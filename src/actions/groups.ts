@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import type { Prisma } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { canCreateOrDeleteGroups, canManageTeamMembership } from "@/lib/roles";
@@ -78,7 +79,7 @@ export async function createTeam(
   }
 
   try {
-    const team = await db.$transaction(async (tx) => {
+    const team = await db.$transaction(async (tx: Prisma.TransactionClient) => {
       const createdTeam = await tx.team.create({
         data: {
           name: parsedInput.data.name,
