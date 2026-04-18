@@ -1,0 +1,147 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id             String          @id @default(cuid())
+  name           String?
+  email          String?         @unique
+  emailVerified  DateTime?
+  image          String?
+  role           UserRole        @default(MEMBER)
+  accounts       Account[]
+  sessions       Session[]
+  authenticators Authenticator[]
+  transactions   Transaction[]   @relation("TransactionActor")
+  teamMemberships TeamMembership[] @relation("TeamMembershipUser")
+  approvedMemberships TeamMembership[] @relation("TeamMembershipApprovedBy")
+  createdTeams   Team[]          @relation("TeamCreator")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Authenticator {
+  credentialID         String  @unique
+  userId               String
+  providerAccountId    String
+  credentialPublicKey  String
+  counter              Int
+  credentialDeviceType String
+  credentialBackedUp   Boolean
+  transports           String?
+  user                 User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, credentialID])
+}
+
+model Transaction {
+  id              String          @id @default(cuid())
+  teamId          String
+  userId          String
+  type            TransactionType
+  amountInCents   Int
+  note            String?         @db.VarChar(240)
+  transactionDate DateTime        @db.Date
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  team            Team            @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  createdBy       User            @relation("TransactionActor", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, transactionDate, createdAt])
+  @@index([teamId, transactionDate, createdAt])
+  @@index([transactionDate, createdAt, id])
+}
+
+model Team {
+  id           String           @id @default(cuid())
+  name         String           @unique @db.VarChar(80)
+  description  String?          @db.VarChar(240)
+  createdById  String
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  createdBy    User             @relation("TeamCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  memberships  TeamMembership[]
+  transactions Transaction[]
+
+  @@index([createdById])
+}
+
+model TeamMembership {
+  id           String               @id @default(cuid())
+  teamId       String
+  userId       String
+  role         TeamMemberRole       @default(MEMBER)
+  status       TeamMembershipStatus @default(PENDING)
+  approvedAt   DateTime?
+  approvedById String?
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  team         Team                 @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user         User                 @relation("TeamMembershipUser", fields: [userId], references: [id], onDelete: Cascade)
+  approvedBy   User?                @relation("TeamMembershipApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+
+  @@unique([teamId, userId])
+  @@index([userId, status])
+  @@index([teamId, status, role])
+}
+
+enum UserRole {
+  ADMIN
+  MODARETOR
+  MEMBER
+}
+
+enum TeamMemberRole {
+  ADMIN
+  MODARETOR
+  MEMBER
+}
+
+enum TeamMembershipStatus {
+  PENDING
+  APPROVED
+}
+
+enum TransactionType {
+  ADD
+  REMOVE
+}
