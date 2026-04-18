@@ -1,4 +1,3 @@
-import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { calculateBalanceInCents } from "@/lib/money";
 import { canManageTeamMembership } from "@/lib/roles";
@@ -31,6 +30,15 @@ interface CreateTeamTransactionInput {
   note: string;
   type: TransactionTypeValue;
   transactionDate: Date;
+}
+
+function hasPrismaErrorCode(error: unknown, code: string) {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    (error as { code?: unknown }).code === code
+  );
 }
 
 export async function createTeamTransaction(
@@ -98,7 +106,7 @@ export async function createTeamTransaction(
           });
         },
         {
-          isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+          isolationLevel: "Serializable",
         },
       );
     } catch (error) {
@@ -110,10 +118,7 @@ export async function createTeamTransaction(
         throw error;
       }
 
-      if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === "P2034"
-      ) {
+      if (hasPrismaErrorCode(error, "P2034")) {
         if (attempt === 1) {
           throw new TransactionConflictError();
         }

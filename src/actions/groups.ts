@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { Prisma } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { canCreateOrDeleteGroups, canManageTeamMembership } from "@/lib/roles";
@@ -38,6 +37,15 @@ function isGlobalAdmin(
   session: { user?: { role?: string | null } | null } | null | undefined,
 ) {
   return canCreateOrDeleteGroups(session?.user?.role);
+}
+
+function hasPrismaErrorCode(error: unknown, code: string) {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    (error as { code?: unknown }).code === code
+  );
 }
 
 export async function createTeam(
@@ -101,10 +109,7 @@ export async function createTeam(
       teamId: team.id,
     };
   } catch (error) {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2002"
-    ) {
+    if (hasPrismaErrorCode(error, "P2002")) {
       return {
         status: "error",
         message: "A team with this name already exists. Choose another name.",
