@@ -15,8 +15,8 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Flow Ledger",
-    template: "%s | Flow Ledger",
+    default: "Money Tracker",
+    template: "%s | Money Tracker",
   },
   description:
     "A polished personal transaction tracker with Google authentication, durable transaction history, and live balance updates.",

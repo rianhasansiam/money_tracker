@@ -80,7 +80,7 @@ export default async function LoginPage() {
                   Welcome back
                 </p>
                 <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-                  Sign in to Flow Ledger
+                  Sign in to Money Tracker
                 </h2>
                 <p className="text-sm leading-6 text-muted-foreground">
                   Use your Google account to access the groups page, request the

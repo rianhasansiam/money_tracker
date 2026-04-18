@@ -37,7 +37,7 @@ export default async function HomePage() {
             </div>
             <div>
               <p className="text-sm font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-                Flow Ledger
+                Money Tracker
               </p>
               <p className="text-sm text-foreground/80">
                 Shared cashflow, kept simple.
