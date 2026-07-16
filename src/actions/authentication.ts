@@ -14,6 +14,7 @@ import {
   enforceIpRateLimit,
   getConfiguredTrustedClientIp,
 } from "@/lib/rate-limit";
+import { resolveAuthDeploymentConfig } from "@/lib/security-policy";
 
 const ALLOWED_AUTH_REDIRECTS = new Set(["/groups", "/dashboard"]);
 
@@ -23,7 +24,17 @@ function safeRedirectTarget(value: string) {
 
 export async function beginGoogleSignIn(redirectTo = "/groups") {
   const requestHeaders = await headers();
-  const clientIp = getConfiguredTrustedClientIp(requestHeaders);
+  const authDeployment = resolveAuthDeploymentConfig(process.env);
+  const trustedClientIp = getConfiguredTrustedClientIp(requestHeaders);
+  // A production preview bound to an exact loopback AUTH_URL has no trusted
+  // proxy peer to identify. Keep protection enabled with one shared local
+  // bucket instead of trusting a requester-controlled forwarding header.
+  const clientIp =
+    trustedClientIp ??
+    (process.env.NODE_ENV === "production" &&
+    authDeployment.topology === "local-development"
+      ? "127.0.0.1"
+      : null);
   let denialLocation: string | null = null;
 
   if (!clientIp && process.env.NODE_ENV === "production") {

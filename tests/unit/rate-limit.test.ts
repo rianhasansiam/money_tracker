@@ -17,6 +17,7 @@ import {
   checkIpRateLimit,
   checkUserRateLimit,
   enforceUserRateLimit,
+  getConfiguredTrustedClientIp,
   getTrustedClientIp,
 } from "@/lib/rate-limit";
 
@@ -237,6 +238,16 @@ describe("trusted client IP parsing", () => {
     expect(getTrustedClientIp({ headers, proxyMode: "cloudflare" })).toBe(
       "203.0.113.11",
     );
+  });
+
+  it("recognizes Vercel's platform signal as its trusted proxy mode", () => {
+    const headers = new Headers({
+      "x-forwarded-for": "203.0.113.12",
+    });
+
+    expect(
+      getConfiguredTrustedClientIp(headers, null, { VERCEL: "1" }),
+    ).toBe("203.0.113.12");
   });
 
   it("rejects malformed trusted headers and falls back only to a valid peer", () => {

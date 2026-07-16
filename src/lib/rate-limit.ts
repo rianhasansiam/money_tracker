@@ -8,6 +8,11 @@ const MAX_WINDOW_SECONDS = 86_400;
 
 export type TrustedProxyMode = "cloudflare" | "forwarded" | "vercel";
 
+interface TrustedProxyEnvironment {
+  TRUSTED_PROXY_MODE?: string;
+  VERCEL?: string;
+}
+
 export interface RateLimitDecision {
   allowed: boolean;
   limit: number;
@@ -291,14 +296,20 @@ export function getTrustedClientIp(input: {
 export function getConfiguredTrustedClientIp(
   headers: Pick<Headers, "get">,
   peerIp?: string | null,
+  environment: TrustedProxyEnvironment = {
+    TRUSTED_PROXY_MODE: process.env.TRUSTED_PROXY_MODE,
+    VERCEL: process.env.VERCEL,
+  },
 ) {
-  const configuredMode = process.env.TRUSTED_PROXY_MODE;
+  const configuredMode = environment.TRUSTED_PROXY_MODE;
   const proxyMode: TrustedProxyMode | null =
     configuredMode === "cloudflare" ||
     configuredMode === "forwarded" ||
     configuredMode === "vercel"
       ? configuredMode
-      : null;
+      : environment.VERCEL === "1"
+        ? "vercel"
+        : null;
 
   return getTrustedClientIp({
     headers,

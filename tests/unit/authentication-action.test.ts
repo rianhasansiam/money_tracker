@@ -110,11 +110,29 @@ describe("Google authentication entry action", () => {
 
   it("fails closed in production when no trustworthy client IP is available", async () => {
     vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("AUTH_URL", "https://finance.example.test");
 
     await expect(beginGoogleSignIn()).rejects.toThrow(
       /redirect:\/login\?authError=unavailable&reference=/,
     );
     expect(mocks.logServerEvent).toHaveBeenCalled();
     expect(mocks.signIn).not.toHaveBeenCalled();
+  });
+
+  it("uses a shared limiter bucket for a loopback production preview", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("AUTH_URL", "http://localhost:3000");
+
+    await beginGoogleSignIn();
+
+    expect(mocks.enforceIpRateLimit).toHaveBeenCalledWith({
+      scope: "authentication-start",
+      ip: "127.0.0.1",
+      limit: 20,
+      windowSeconds: 300,
+    });
+    expect(mocks.signIn).toHaveBeenCalledWith("google", {
+      redirectTo: "/groups",
+    });
   });
 });
