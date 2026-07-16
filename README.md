@@ -48,7 +48,7 @@ Copy `.env.example` to an ignored local `.env` file and provide the values throu
 | `AUTH_SECRET` | Development, tests, CI, production | Auth.js session and token secret |
 | `AUTH_GOOGLE_ID` | Interactive development and production | Google OAuth client identifier |
 | `AUTH_GOOGLE_SECRET` | Interactive development and production | Google OAuth client secret |
-| `AUTH_URL` | Self-hosted production; optional locally; omit on Vercel | Exact canonical application origin; HTTPS is mandatory in self-hosted production |
+| `AUTH_URL` | Self-hosted production; optional locally; omit on Vercel | Exact canonical application origin; HTTPS is mandatory except for local loopback previews |
 | `BOOTSTRAP_ADMIN_EMAIL` | Bootstrap job only | Normalized identity promoted by the explicit administrator bootstrap command |
 | `RATE_LIMIT_HASH_SECRET` | Production; recommended locally | Dedicated secret, at least 16 characters, used to HMAC rate-limit subjects; falls back to `AUTH_SECRET` when absent |
 | `TRUSTED_PROXY_MODE` | Production behind a recognized trusted proxy | `cloudflare`, `forwarded`, or `vercel`; use only when the immediate proxy overwrites forwarded headers |
@@ -167,7 +167,7 @@ Admission is database-backed: an administrator creates an expiring invitation, w
 Supported host topologies are deliberately narrow:
 
 - On Vercel, the platform-provided `VERCEL=1` signal enables managed dynamic-host behavior. Do not set that value manually on a self-hosted service.
-- A production self-hosted deployment must set `AUTH_URL` to one canonical HTTPS origin. It must contain no credentials, path, query string, or fragment. The reverse proxy must reject unrecognized hosts and overwrite, rather than append to or pass through, `Host`, `Forwarded`, and `X-Forwarded-Host` values.
+- A production self-hosted deployment must set `AUTH_URL` to one canonical HTTPS origin. An HTTP origin is accepted only when its host is exactly `localhost`, `127.0.0.1`, or `[::1]` for a local production preview. The URL must contain no credentials, path, query string, or fragment. The reverse proxy must reject unrecognized hosts and overwrite, rather than append to or pass through, `Host`, `Forwarded`, and `X-Forwarded-Host` values.
 - Local development and tests may omit `AUTH_URL` only for loopback hosts. If it is set locally, it becomes the exact allowed origin.
 
 Keep Google OAuth callback URLs limited to the canonical application origin. Test sign-in, denial, callback, and sign-out flows through the same proxy/CDN configuration used in production; an off-domain `Host` or forwarded-host value must never influence a callback or redirect.

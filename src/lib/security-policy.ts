@@ -67,6 +67,10 @@ function parseCanonicalOrigin(value: string, requireHttps: boolean) {
   }
 }
 
+function isLoopbackOrigin(origin: string) {
+  return LOCAL_DEVELOPMENT_HOSTS.has(new URL(origin).hostname);
+}
+
 export function resolveAuthDeploymentConfig(
   environment: AuthDeploymentEnvironment,
 ): AuthDeploymentConfig {
@@ -98,10 +102,24 @@ export function resolveAuthDeploymentConfig(
     throw new AuthDeploymentConfigurationError();
   }
 
+  const canonicalOrigin = parseCanonicalOrigin(configuredUrl, false);
+
+  if (new URL(canonicalOrigin).protocol === "http:") {
+    if (!isLoopbackOrigin(canonicalOrigin)) {
+      throw new AuthDeploymentConfigurationError();
+    }
+
+    return {
+      topology: "local-development",
+      trustHost: true,
+      canonicalOrigin,
+    };
+  }
+
   return {
     topology: "self-hosted",
     trustHost: true,
-    canonicalOrigin: parseCanonicalOrigin(configuredUrl, true),
+    canonicalOrigin,
   };
 }
 

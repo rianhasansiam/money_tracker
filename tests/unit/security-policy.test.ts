@@ -38,6 +38,26 @@ describe("authentication deployment policy", () => {
     });
   });
 
+  it("allows an exact HTTP loopback origin for a local production preview", () => {
+    expect(
+      resolveAuthDeploymentConfig({
+        NODE_ENV: "production",
+        AUTH_URL: "http://localhost:3000",
+      }),
+    ).toEqual({
+      topology: "local-development",
+      trustHost: true,
+      canonicalOrigin: "http://localhost:3000",
+    });
+
+    expect(() =>
+      resolveAuthDeploymentConfig({
+        NODE_ENV: "production",
+        AUTH_URL: "http://money.example.test",
+      }),
+    ).toThrow(AuthDeploymentConfigurationError);
+  });
+
   it("allows dynamic hosts only on the explicitly recognized managed platform", () => {
     const deployment = resolveAuthDeploymentConfig({
       NODE_ENV: "production",
