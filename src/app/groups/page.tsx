@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Building2, Clock3, ShieldCheck, Users } from "lucide-react";
+import { Building2, Clock3, Users } from "lucide-react";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { CreateTeamForm } from "@/components/groups/create-team-form";
 import { ApproveRequestButton } from "@/components/groups/approve-request-button";
@@ -9,26 +9,141 @@ import { RequestAccessButton } from "@/components/groups/request-access-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { auth } from "@/lib/auth";
-import { formatTransactionDate } from "@/lib/money";
-import { getGroupsPageData } from "@/lib/queries/groups";
+import { formatTimestampInBusinessTimeZone } from "@/lib/date-time";
+import { getRateLimitedGroupsPageData } from "@/lib/queries/groups";
+import {
+  RateLimitExceededError,
+  RateLimitUnavailableError,
+} from "@/lib/rate-limit";
 import {
   canCreateOrDeleteGroups,
   canManageTeamMembership,
   formatRoleLabel,
 } from "@/lib/roles";
+import type { GroupsPageCursors } from "@/lib/queries/groups";
 
 export const metadata = {
   title: "Groups",
 };
 
-export default async function GroupsPage() {
+interface GroupsPageProps {
+  searchParams: Promise<{
+    membershipCursor?: string | string[];
+    availableCursor?: string | string[];
+    approvalCursor?: string | string[];
+  }>;
+}
+
+function singleCursor(value: string | string[] | undefined) {
+  if (value === undefined || typeof value === "string") {
+    return value;
+  }
+
+  return "";
+}
+
+function groupsPageHref(cursors: GroupsPageCursors) {
+  const params = new URLSearchParams();
+
+  if (cursors.memberships) {
+    params.set("membershipCursor", cursors.memberships);
+  }
+
+  if (cursors.availableTeams) {
+    params.set("availableCursor", cursors.availableTeams);
+  }
+
+  if (cursors.adminPendingApprovals) {
+    params.set("approvalCursor", cursors.adminPendingApprovals);
+  }
+
+  const query = params.toString();
+  return query ? `/groups?${query}` : "/groups";
+}
+
+function CollectionPageNavigation({
+  currentCursor,
+  href,
+  label,
+  nextCursor,
+}: {
+  currentCursor?: string;
+  href: string;
+  label: string;
+  nextCursor: string | null;
+}) {
+  if (!currentCursor && !nextCursor) {
+    return null;
+  }
+
+  return (
+    <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 sm:flex-row sm:items-center sm:justify-between">
+      <p>
+        {nextCursor
+          ? `More ${label} exist beyond this bounded page.`
+          : `This is the final page of ${label}.`}
+      </p>
+      {nextCursor ? (
+        <Button asChild variant="outline" size="sm">
+          <Link href={href}>Next page</Link>
+        </Button>
+      ) : null}
+    </div>
+  );
+}
+
+export default async function GroupsPage({ searchParams }: GroupsPageProps) {
   const session = await auth();
 
   if (!session?.user?.id) {
     redirect("/login");
   }
 
-  const groupsData = await getGroupsPageData(session.user.id);
+  const resolvedSearchParams = await searchParams;
+  const currentCursors: GroupsPageCursors = {
+    memberships: singleCursor(resolvedSearchParams.membershipCursor),
+    availableTeams: singleCursor(resolvedSearchParams.availableCursor),
+    adminPendingApprovals: singleCursor(resolvedSearchParams.approvalCursor),
+  };
+  let groupsData;
+
+  try {
+    groupsData = await getRateLimitedGroupsPageData(
+      session.user.id,
+      currentCursors,
+    );
+  } catch (error) {
+    if (
+      error instanceof RateLimitExceededError ||
+      error instanceof RateLimitUnavailableError
+    ) {
+      const message =
+        error instanceof RateLimitExceededError
+          ? `Too many group requests. Try again in ${error.retryAfterSeconds} seconds.`
+          : "Group protection is temporarily unavailable. Wait a moment and try again.";
+
+      return (
+        <main className="page-shell min-h-screen px-3 py-5 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl rounded-3xl border border-white/70 bg-white/85 p-6 shadow-sm">
+            <h1 className="text-xl font-semibold">Groups temporarily paused</h1>
+            <p className="mt-3 text-sm leading-6 text-muted-foreground">
+              {message}
+            </p>
+            <Button asChild variant="outline" className="mt-5">
+              <Link href="/">Back to home</Link>
+            </Button>
+          </div>
+        </main>
+      );
+    }
+
+    throw error;
+  }
+
+  if (!groupsData) {
+    redirect("/groups");
+  }
+
   const firstName = session.user.name?.split(" ")[0] ?? "there";
   const canManageGroups = canCreateOrDeleteGroups(session.user.role);
 
@@ -46,12 +161,19 @@ export default async function GroupsPage() {
             <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
               Join the right team, wait for an admin approval when needed, and
               open only the dashboards you belong to. Members can view team
-              ledgers, while admins and modaretors can handle transactions.
+              ledgers, while admins and moderators can handle transactions.
               Only admins can create or delete groups.
             </p>
           </div>
 
-          <SignOutButton className="w-full sm:w-auto" buttonClassName="w-full" />
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+            {canManageGroups ? (
+              <Button asChild variant="outline" className="w-full sm:w-auto">
+                <Link href="/admin">Administration</Link>
+              </Button>
+            ) : null}
+            <SignOutButton className="w-full sm:w-auto" buttonClassName="w-full" />
+          </div>
         </header>
 
         <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -84,7 +206,7 @@ export default async function GroupsPage() {
                   </p>
                 </div>
                 <div className="rounded-2xl bg-primary/10 px-3 py-2 text-xs font-semibold text-primary sm:text-sm">
-                  {item.value === 1 ? "1 team" : `${item.value} teams`}
+                  {item.value === 1 ? "1 shown" : `${item.value} shown`}
                 </div>
               </CardContent>
             </Card>
@@ -98,7 +220,7 @@ export default async function GroupsPage() {
                 <CardTitle className="text-xl">Your teams</CardTitle>
                 <CardDescription>
                   Approved memberships give you access to the matching team
-                  dashboard. Members can view only, while admins and modaretors
+                  dashboard. Members can view only, while admins and moderators
                   can also transact.
                 </CardDescription>
               </CardHeader>
@@ -120,7 +242,7 @@ export default async function GroupsPage() {
                   <div className="grid gap-4 md:grid-cols-2">
                     {groupsData.approvedTeams.map((team) => (
                       <Card
-                        key={team.membershipId}
+                        key={team.teamId}
                         className="border-white/70 bg-white/80 shadow-sm"
                       >
                         <CardContent className="space-y-4 p-5">
@@ -203,7 +325,7 @@ export default async function GroupsPage() {
                   <div className="space-y-4">
                     {groupsData.pendingTeams.map((team) => (
                       <div
-                        key={team.membershipId}
+                        key={team.teamId}
                         className="rounded-3xl border border-white/70 bg-white/80 p-4 shadow-sm"
                       >
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -214,13 +336,23 @@ export default async function GroupsPage() {
                             </p>
                           </div>
                           <span className="w-fit rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-secondary-foreground">
-                            Requested {formatTransactionDate(team.requestedAt)}
+                            Requested {formatTimestampInBusinessTimeZone(team.requestedAt)}
                           </span>
                         </div>
                       </div>
                     ))}
                   </div>
                 )}
+                <CollectionPageNavigation
+                  currentCursor={currentCursors.memberships}
+                  nextCursor={groupsData.nextCursors.memberships}
+                  label="your memberships"
+                  href={groupsPageHref({
+                    ...currentCursors,
+                    memberships:
+                      groupsData.nextCursors.memberships ?? undefined,
+                  })}
+                />
               </CardContent>
             </Card>
 
@@ -255,19 +387,6 @@ export default async function GroupsPage() {
                             </p>
                           </div>
 
-                          <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                            <span className="inline-flex items-center gap-2 rounded-full bg-muted/65 px-3 py-1">
-                              <Users className="h-4 w-4" />
-                              {team.memberCount} members
-                            </span>
-                            {team.creatorName ? (
-                              <span className="inline-flex items-center gap-2 rounded-full bg-muted/65 px-3 py-1 wrap-break-word">
-                                <ShieldCheck className="h-4 w-4" />
-                                Created by {team.creatorName}
-                              </span>
-                            ) : null}
-                          </div>
-
                           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                             <RequestAccessButton teamId={team.teamId} />
                             {canManageGroups ? (
@@ -282,6 +401,16 @@ export default async function GroupsPage() {
                     ))}
                   </div>
                 )}
+                <CollectionPageNavigation
+                  currentCursor={currentCursors.availableTeams}
+                  nextCursor={groupsData.nextCursors.availableTeams}
+                  label="available teams"
+                  href={groupsPageHref({
+                    ...currentCursors,
+                    availableTeams:
+                      groupsData.nextCursors.availableTeams ?? undefined,
+                  })}
+                />
               </CardContent>
             </Card>
           </div>
@@ -294,7 +423,7 @@ export default async function GroupsPage() {
                 <CardHeader className="space-y-2">
                   <CardTitle className="text-xl">Group creation</CardTitle>
                   <CardDescription className="leading-6">
-                    Only admins can create or delete groups. Modaretors can
+                    Only admins can create or delete groups. Moderators can
                     manage team transactions and approvals, while members can
                     request access to existing groups and view only approved
                     dashboards.
@@ -333,13 +462,13 @@ export default async function GroupsPage() {
                         className="rounded-3xl border border-white/70 bg-white/80 p-4 shadow-sm"
                       >
                         <p className="wrap-break-word font-semibold text-foreground">
-                          {request.requesterName || request.requesterEmail || "Unknown member"}
+                          {request.requesterName || "Unknown member"}
                         </p>
                         <p className="mt-1 wrap-break-word text-sm leading-6 text-muted-foreground">
                           wants to join {request.teamName}
                         </p>
                         <p className="mt-2 text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase sm:text-xs sm:tracking-[0.16em]">
-                          Requested {formatTransactionDate(request.requestedAt)}
+                          Requested {formatTimestampInBusinessTimeZone(request.requestedAt)}
                         </p>
                         <div className="mt-4">
                           <ApproveRequestButton membershipId={request.membershipId} />
@@ -348,6 +477,16 @@ export default async function GroupsPage() {
                     ))}
                   </div>
                 )}
+                <CollectionPageNavigation
+                  currentCursor={currentCursors.adminPendingApprovals}
+                  nextCursor={groupsData.nextCursors.adminPendingApprovals}
+                  label="pending approvals"
+                  href={groupsPageHref({
+                    ...currentCursors,
+                    adminPendingApprovals:
+                      groupsData.nextCursors.adminPendingApprovals ?? undefined,
+                  })}
+                />
               </CardContent>
             </Card>
 
@@ -361,7 +500,7 @@ export default async function GroupsPage() {
                     <CardTitle className="text-base">How roles work</CardTitle>
                     <CardDescription className="mt-1 text-sm">
                       Approved members can view only their approved team
-                      dashboards. Approved team admins and modaretors can add or
+                      dashboards. Approved team admins and moderators can add or
                       remove money, and only global admins can create or delete
                       groups.
                     </CardDescription>

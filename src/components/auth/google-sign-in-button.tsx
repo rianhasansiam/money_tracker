@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { signIn } from "@/lib/auth";
+import { beginGoogleSignIn } from "@/actions/authentication";
 
 interface GoogleSignInButtonProps {
   redirectTo?: string;
@@ -12,11 +12,7 @@ export function GoogleSignInButton({
 }: GoogleSignInButtonProps) {
   return (
     <form
-      action={async () => {
-        "use server";
-
-        await signIn("google", { redirectTo });
-      }}
+      action={beginGoogleSignIn.bind(null, redirectTo)}
       className={className}
     >
       <Button type="submit" size="lg" className="w-full justify-center">

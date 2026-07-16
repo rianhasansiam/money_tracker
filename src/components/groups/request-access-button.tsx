@@ -20,15 +20,21 @@ export function RequestAccessButton({ teamId }: RequestAccessButtonProps) {
       className="w-full sm:w-auto"
       onClick={() => {
         startTransition(async () => {
-          const result = await requestTeamAccess(teamId);
+          try {
+            const result = await requestTeamAccess(teamId);
 
-          if (result.status === "error") {
-            toast.error(result.message);
-            return;
+            if (result.status === "error") {
+              toast.error(result.message);
+              return;
+            }
+
+            toast.success(result.message);
+            router.refresh();
+          } catch {
+            toast.error(
+              "We could not confirm the join request. Refresh the page before trying again.",
+            );
           }
-
-          toast.success(result.message);
-          router.refresh();
         });
       }}
       disabled={isPending}

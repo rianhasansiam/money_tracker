@@ -22,15 +22,21 @@ export function ApproveRequestButton({
       className="w-full sm:w-auto"
       onClick={() => {
         startTransition(async () => {
-          const result = await approveTeamAccess(membershipId);
+          try {
+            const result = await approveTeamAccess(membershipId);
 
-          if (result.status === "error") {
-            toast.error(result.message);
-            return;
+            if (result.status === "error") {
+              toast.error(result.message);
+              return;
+            }
+
+            toast.success(result.message);
+            router.refresh();
+          } catch {
+            toast.error(
+              "We could not confirm this approval. Refresh the page to see its current state.",
+            );
           }
-
-          toast.success(result.message);
-          router.refresh();
         });
       }}
       disabled={isPending}

@@ -8,12 +8,49 @@ export const metadata = {
   title: "Sign In",
 };
 
-export default async function LoginPage() {
+interface LoginPageProps {
+  searchParams: Promise<{
+    authError?: string | string[];
+    retryAfter?: string | string[];
+    reference?: string | string[];
+  }>;
+}
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
   const session = await auth();
 
   if (session?.user?.id) {
     redirect("/groups");
   }
+
+  const query = await searchParams;
+  const authError =
+    typeof query.authError === "string" ? query.authError : null;
+  const retryAfterValue =
+    typeof query.retryAfter === "string"
+      ? Number.parseInt(query.retryAfter, 10)
+      : Number.NaN;
+  const retryAfter =
+    Number.isInteger(retryAfterValue) &&
+    retryAfterValue >= 1 &&
+    retryAfterValue <= 300
+      ? retryAfterValue
+      : null;
+  const reference =
+    typeof query.reference === "string" &&
+    /^[0-9a-f-]{36}$/i.test(query.reference)
+      ? query.reference
+      : null;
+  const authErrorMessage =
+    authError === "rate_limited"
+      ? `Too many sign-in attempts. Try again${
+          retryAfter ? ` in ${retryAfter} seconds` : " shortly"
+        }.`
+      : authError === "unavailable"
+        ? `Sign-in protection is temporarily unavailable. Try again later.${
+            reference ? ` Reference: ${reference}.` : ""
+          }`
+        : null;
 
   return (
     <main className="page-shell min-h-screen px-3 py-5 sm:px-6 lg:px-8">
@@ -26,11 +63,11 @@ export default async function LoginPage() {
 
           <div className="space-y-4">
             <h1 className="max-w-xl text-3xl font-semibold tracking-tight text-balance sm:text-5xl">
-              Join the right team workspace with one Google click.
+              Access your invited team workspace with Google.
             </h1>
             <p className="max-w-lg text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8">
-              Sign in with Google, browse available groups, request access to
-              the right team, and open team-specific dashboards after approval.
+              Sign in with the Google identity provisioned by an administrator,
+              then open only the groups and dashboards you are authorized to use.
             </p>
           </div>
 
@@ -50,7 +87,7 @@ export default async function LoginPage() {
                 icon: LockKeyhole,
                 title: "Permanent history",
                 description:
-                  "Every transaction is stored in PostgreSQL with the acting team admin or modaretor.",
+                  "Every transaction is stored in PostgreSQL with the acting team admin or moderator.",
               },
             ].map((item, index) => (
               <Card
@@ -83,16 +120,24 @@ export default async function LoginPage() {
                   Sign in to Money Tracker
                 </h2>
                 <p className="text-sm leading-6 text-muted-foreground">
-                  Use your Google account to access the groups page, request the
-                  right team, and open dashboards only after approval.
+                  Use the invited Google account associated with this workspace.
+                  Unprovisioned identities cannot establish an application session.
                 </p>
               </div>
 
               <div className="mt-8 space-y-4">
+                {authErrorMessage ? (
+                  <p
+                    role="alert"
+                    className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900"
+                  >
+                    {authErrorMessage}
+                  </p>
+                ) : null}
                 <GoogleSignInButton redirectTo="/groups" />
                 <p className="text-sm leading-6 text-muted-foreground">
-                  By continuing, you will authenticate with Google and be
-                  redirected to the groups page.
+                  By continuing, you will authenticate with Google. Access is
+                  granted only after server-side admission checks succeed.
                 </p>
               </div>
             </div>

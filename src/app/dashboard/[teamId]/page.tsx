@@ -3,7 +3,11 @@ import { redirect } from "next/navigation";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { auth } from "@/lib/auth";
-import { getDashboardData } from "@/lib/queries/dashboard";
+import { getRateLimitedDashboardData } from "@/lib/queries/dashboard";
+import {
+  RateLimitExceededError,
+  RateLimitUnavailableError,
+} from "@/lib/rate-limit";
 import { canManageTeamMembership, formatRoleLabel } from "@/lib/roles";
 
 interface TeamDashboardPageProps {
@@ -22,7 +26,40 @@ export default async function TeamDashboardPage({
   }
 
   const { teamId } = await params;
-  const dashboardData = await getDashboardData(session.user.id, teamId);
+  let dashboardData;
+
+  try {
+    dashboardData = await getRateLimitedDashboardData(session.user.id, teamId);
+  } catch (error) {
+    if (
+      error instanceof RateLimitExceededError ||
+      error instanceof RateLimitUnavailableError
+    ) {
+      const message =
+        error instanceof RateLimitExceededError
+          ? `Too many history requests. Try again in ${error.retryAfterSeconds} seconds.`
+          : "History protection is temporarily unavailable. Wait a moment and try again.";
+
+      return (
+        <main className="page-shell min-h-screen px-3 py-5 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl rounded-3xl border border-white/70 bg-white/85 p-6 shadow-sm">
+            <h1 className="text-xl font-semibold">Dashboard temporarily paused</h1>
+            <p className="mt-3 text-sm leading-6 text-muted-foreground">
+              {message}
+            </p>
+            <Link
+              href="/groups"
+              className="mt-5 inline-flex h-11 items-center justify-center rounded-full border border-border bg-white px-5 text-sm font-semibold"
+            >
+              Back to groups
+            </Link>
+          </div>
+        </main>
+      );
+    }
+
+    throw error;
+  }
 
   if (!dashboardData) {
     redirect("/groups");
@@ -70,7 +107,7 @@ export default async function TeamDashboardPage({
           balanceInCents={dashboardData.balanceInCents}
           totalAddedInCents={dashboardData.totalAddedInCents}
           totalRemovedInCents={dashboardData.totalRemovedInCents}
-          transactions={dashboardData.transactions}
+          transactionHistory={dashboardData.transactionHistory}
         />
       </div>
     </main>

@@ -1,7 +1,12 @@
 import type { ZodError } from "zod";
 import { z } from "zod";
 
-export const teamIdSchema = z.string().cuid("Invalid team.");
+export const TEAM_ID_MAX_LENGTH = 32;
+
+export const teamIdSchema = z
+  .string()
+  .max(TEAM_ID_MAX_LENGTH, "Invalid team.")
+  .cuid("Invalid team.");
 export const membershipIdSchema = z.string().cuid("Invalid membership request.");
 
 export const createTeamFormSchema = z.object({

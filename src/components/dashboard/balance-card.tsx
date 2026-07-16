@@ -109,7 +109,7 @@ export function BalanceCard({
           <div className="border-t border-white/70 bg-white/70 px-5 py-4 sm:px-7">
             <p className="text-sm leading-6 text-muted-foreground">
               You can review this team balance on any device, but only team
-              admins and modaretors can add or remove money.
+              admins and moderators can add or remove money.
             </p>
           </div>
         ) : null}

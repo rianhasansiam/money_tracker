@@ -1,5 +1,3 @@
-import type { DashboardTransactionType } from "@/lib/queries/dashboard";
-
 const moneyFormatter = new Intl.NumberFormat("en-BD", {
   style: "currency",
   currency: "BDT",
@@ -7,40 +5,77 @@ const moneyFormatter = new Intl.NumberFormat("en-BD", {
   maximumFractionDigits: 2,
 });
 
-const dateFormatter = new Intl.DateTimeFormat("en-BD", {
-  dateStyle: "medium",
-  timeZone: "UTC",
-});
+export const MAX_TRANSACTION_AMOUNT_IN_CENTS = 2_147_483_647;
+export const MAX_MONEY_INPUT_LENGTH = 32;
 
-const MONEY_INPUT_PATTERN = /^\d+(?:\.\d{1,2})?$/;
+const MAX_TRANSACTION_AMOUNT_IN_MINOR_UNITS = BigInt(
+  MAX_TRANSACTION_AMOUNT_IN_CENTS,
+);
+const ONE_HUNDRED_MINOR_UNITS = BigInt(100);
+const ZERO_MINOR_UNITS = BigInt(0);
+const UNGROUPED_MONEY_INPUT_PATTERN = /^(?:0|[1-9]\d*)(?:\.\d{1,2})?$/;
+const GROUPED_MONEY_INPUT_PATTERN =
+  /^[1-9]\d{0,2}(?:,\d{3})+(?:\.\d{1,2})?$/;
 
-export function normalizeMoneyInput(value: string | number) {
-  return String(value).replaceAll(",", "").trim();
+type MoneyInputErrorReason = "format" | "non-positive" | "too-large";
+type MoneyTransactionType = "ADD" | "REMOVE";
+
+export class MoneyInputError extends Error {
+  constructor(public readonly reason: MoneyInputErrorReason) {
+    super("Invalid amount.");
+    this.name = "MoneyInputError";
+  }
 }
 
-export function parseMoneyToMinorUnits(value: string | number) {
-  const normalized = normalizeMoneyInput(value);
+export class MoneyAggregateOverflowError extends Error {
+  constructor() {
+    super("Transaction totals exceed the supported range.");
+    this.name = "MoneyAggregateOverflowError";
+  }
+}
 
-  if (!MONEY_INPUT_PATTERN.test(normalized)) {
-    throw new Error("Invalid amount.");
+export function parseMoneyToMinorUnits(value: string) {
+  if (value.length > MAX_MONEY_INPUT_LENGTH) {
+    throw new MoneyInputError("too-large");
   }
 
+  const input = value.trim();
+
+  if (
+    !UNGROUPED_MONEY_INPUT_PATTERN.test(input) &&
+    !GROUPED_MONEY_INPUT_PATTERN.test(input)
+  ) {
+    throw new MoneyInputError("format");
+  }
+
+  const normalized = input.replaceAll(",", "");
   const [wholePart, decimalPart = ""] = normalized.split(".");
-  const paddedDecimalPart = `${decimalPart}00`.slice(0, 2);
-  const amountInCents = Number(wholePart) * 100 + Number(paddedDecimalPart);
+  const paddedDecimalPart = decimalPart.padEnd(2, "0");
+  const amountInCents =
+    BigInt(wholePart) * ONE_HUNDRED_MINOR_UNITS +
+    BigInt(paddedDecimalPart || "0");
 
-  if (!Number.isSafeInteger(amountInCents) || amountInCents <= 0) {
-    throw new Error("Invalid amount.");
+  if (amountInCents <= ZERO_MINOR_UNITS) {
+    throw new MoneyInputError("non-positive");
   }
 
-  return amountInCents;
+  if (amountInCents > MAX_TRANSACTION_AMOUNT_IN_MINOR_UNITS) {
+    throw new MoneyInputError("too-large");
+  }
+
+  return Number(amountInCents);
 }
 
-export function isValidMoneyInput(value: string | number) {
+export function getMoneyInputErrorReason(value: string) {
   try {
-    return parseMoneyToMinorUnits(value) > 0;
-  } catch {
-    return false;
+    parseMoneyToMinorUnits(value);
+    return null;
+  } catch (error) {
+    if (error instanceof MoneyInputError) {
+      return error.reason;
+    }
+
+    throw error;
   }
 }
 
@@ -50,7 +85,7 @@ export function formatCurrencyFromMinorUnits(amountInCents: number) {
 
 export function formatSignedCurrency(
   amountInCents: number,
-  type: DashboardTransactionType,
+  type: MoneyTransactionType,
 ) {
   const sign = type === "ADD" ? "+" : "-";
 
@@ -59,54 +94,41 @@ export function formatSignedCurrency(
 
 export function calculateBalanceInCents(
   totals: Array<{
-    type: DashboardTransactionType;
+    type: MoneyTransactionType;
     amountInCents: number;
   }>,
 ) {
-  const totalAdded = totals
-    .filter((entry) => entry.type === "ADD")
-    .reduce((sum, entry) => sum + entry.amountInCents, 0);
+  let totalAdded = 0;
+  let totalRemoved = 0;
 
-  const totalRemoved = totals
-    .filter((entry) => entry.type === "REMOVE")
-    .reduce((sum, entry) => sum + entry.amountInCents, 0);
+  for (const entry of totals) {
+    if (
+      !Number.isSafeInteger(entry.amountInCents) ||
+      entry.amountInCents < 0
+    ) {
+      throw new MoneyAggregateOverflowError();
+    }
 
-  return totalAdded - totalRemoved;
-}
+    if (entry.type === "ADD") {
+      totalAdded += entry.amountInCents;
 
-export function getTodayDateInputValue(date = new Date()) {
-  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-  return localDate.toISOString().slice(0, 10);
-}
+      if (!Number.isSafeInteger(totalAdded)) {
+        throw new MoneyAggregateOverflowError();
+      }
+    } else {
+      totalRemoved += entry.amountInCents;
 
-export function isFutureDateInput(value: string) {
-  return value > getTodayDateInputValue();
-}
-
-export function parseDateInput(value: string) {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
-
-  if (!match) {
-    throw new Error("Invalid date.");
+      if (!Number.isSafeInteger(totalRemoved)) {
+        throw new MoneyAggregateOverflowError();
+      }
+    }
   }
 
-  const [, year, month, day] = match;
-  const parsedDate = new Date(
-    Date.UTC(Number(year), Number(month) - 1, Number(day)),
-  );
+  const balanceInCents = totalAdded - totalRemoved;
 
-  if (
-    Number.isNaN(parsedDate.getTime()) ||
-    parsedDate.getUTCFullYear() !== Number(year) ||
-    parsedDate.getUTCMonth() !== Number(month) - 1 ||
-    parsedDate.getUTCDate() !== Number(day)
-  ) {
-    throw new Error("Invalid date.");
+  if (!Number.isSafeInteger(balanceInCents)) {
+    throw new MoneyAggregateOverflowError();
   }
 
-  return parsedDate;
-}
-
-export function formatTransactionDate(value: Date | string) {
-  return dateFormatter.format(new Date(value));
+  return balanceInCents;
 }

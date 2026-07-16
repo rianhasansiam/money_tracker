@@ -80,7 +80,7 @@ export default async function HomePage() {
               </h1>
               <p className="max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8">
                 Let each team keep its own balance, transaction history, and
-                approval flow while members, modaretors, and admins see the
+                approval flow while members, moderators, and admins see the
                 right controls for their role.
               </p>
             </div>
@@ -106,9 +106,9 @@ export default async function HomePage() {
                   description: "Each approved team member sees only the dashboard for their own groups.",
                 },
                 {
-                  title: "Member, modaretor, admin roles",
+                  title: "Member, moderator, admin roles",
                   description:
-                    "Members can view dashboards, while admins and modaretors control transactions.",
+                    "Members can view dashboards, while admins and moderators control transactions.",
                 },
                 {
                   title: "Ready to deploy",

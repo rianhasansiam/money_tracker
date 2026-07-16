@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { applyServerFieldErrors } from "@/lib/server-field-errors";
 import {
   createTeamFormSchema,
   getCreateTeamFormDefaults,
@@ -31,20 +32,24 @@ export function CreateTeamForm() {
   async function submitTeam(values: CreateTeamFormValues) {
     setServerMessage(null);
 
-    const result = await createTeam(values);
+    let result: Awaited<ReturnType<typeof createTeam>>;
+
+    try {
+      result = await createTeam(values);
+    } catch {
+      const message =
+        "We could not confirm the team creation. Refresh the groups page before trying again.";
+      setServerMessage(message);
+      toast.error(message);
+      return;
+    }
 
     if (result.status === "error") {
       if (result.fieldErrors) {
-        for (const [key, message] of Object.entries(result.fieldErrors)) {
-          if (!message) {
-            continue;
-          }
-
-          form.setError(key as keyof CreateTeamFormValues, {
-            type: "server",
-            message,
-          });
-        }
+        applyServerFieldErrors<CreateTeamFormValues>(
+          form.setError,
+          result.fieldErrors,
+        );
       }
 
       setServerMessage(result.message);

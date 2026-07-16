@@ -1,17 +1,49 @@
 {
-  "name": "bank",
+  "name": "money-tracker",
   "version": "0.1.0",
+  "description": "Team-scoped money tracking with auditable, integrity-protected PostgreSQL ledgers.",
   "private": true,
+  "engines": {
+    "node": "22.22.2",
+    "npm": "11.11.0"
+  },
+  "packageManager": "npm@11.11.0",
   "scripts": {
     "dev": "next dev",
+    "prebuild": "npm run db:generate",
     "build": "next build",
+    "postbuild": "npm run runtime:prune && npm run runtime:verify",
+    "build:webpack": "next build --webpack",
+    "verify:proxy-manifest": "node scripts/verify-proxy-manifest.mjs",
+    "runtime:prune": "node scripts/prepare-runtime-artifact.mjs",
+    "runtime:verify": "node scripts/verify-runtime-artifact.mjs",
     "start": "next start",
+    "start:test": "tsx scripts/start-test-server.ts",
+    "postinstall": "node scripts/postinstall.mjs",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
+    "test": "npm run test:unit && npm run test:integration && npm run test:authorization",
+    "test:unit": "vitest run tests/unit",
+    "test:integration": "npm run db:test:prepare && vitest run tests/integration",
+    "test:authorization": "vitest run tests/authorization tests/unit/admin-action.test.ts tests/unit/authentication-action.test.ts tests/unit/dashboard-action.test.ts tests/unit/transaction-action.test.ts",
+    "test:e2e": "npm run db:test:prepare && tsx scripts/require-test-environment.ts e2e && vitest run tests/e2e && playwright test",
     "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate dev",
+    "db:migrate": "npm run db:migrate:dev",
+    "db:migrate:dev": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:validate": "prisma validate",
+    "db:test:migrate": "tsx scripts/run-test-database-command.ts deploy",
+    "db:test:status": "tsx scripts/run-test-database-command.ts status",
+    "db:test:prepare": "npm run db:generate && npm run db:test:migrate",
+    "db:bootstrap-admin": "tsx scripts/bootstrap-admin.ts",
+    "db:cleanup-rate-limits": "tsx scripts/cleanup-rate-limits.ts",
+    "db:purge-team": "tsx scripts/purge-team.ts",
+    "db:revoke-all-sessions": "tsx scripts/revoke-all-sessions.ts",
     "db:push": "prisma db push",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "knip": "knip",
+    "audit": "npm audit --omit=dev && npm audit",
+    "ci": "npm run db:generate && npm run db:validate && npm run lint && npm run typecheck && npm run test:unit && npm run test:integration && npm run test:authorization && npm run knip && npm run build:webpack && npm run verify:proxy-manifest && npm run build && npm run verify:proxy-manifest && npm run audit"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.2",
@@ -25,10 +57,9 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^1.8.0",
-    "next": "16.2.4",
+    "next": "16.2.10",
     "next-auth": "^5.0.0-beta.31",
     "pg": "^8.20.0",
-    "prisma": "^7.7.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-hook-form": "^7.72.1",
@@ -37,13 +68,31 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@playwright/test": "1.61.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^17.4.2",
     "eslint": "^9",
-    "eslint-config-next": "16.2.4",
+    "eslint-config-next": "16.2.10",
+    "knip": "^6.26.0",
+    "prisma": "^7.7.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "tsx": "^4.23.1",
+    "typescript": "^5",
+    "vitest": "^4.1.10"
+  },
+  "overrides": {
+    "next": {
+      "postcss": "8.5.10"
+    },
+    "prisma": {
+      "@prisma/dev": {
+        "@hono/node-server": "1.19.13",
+        "hono": "4.12.25",
+        "fast-uri": "3.1.2"
+      }
+    }
   }
 }

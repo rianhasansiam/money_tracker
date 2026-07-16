@@ -1,25 +1,70 @@
+"use client";
+
+import { useState, useTransition } from "react";
 import { ArrowDownLeft, ArrowUpRight, Clock3 } from "lucide-react";
+import { loadMoreTransactionHistory } from "@/actions/dashboard";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { formatTransactionDateOnly } from "@/lib/date-time";
 import {
   formatCurrencyFromMinorUnits,
   formatSignedCurrency,
-  formatTransactionDate,
 } from "@/lib/money";
-import type { DashboardTransaction } from "@/lib/queries/dashboard";
+import type { TransactionHistoryPageDto } from "@/lib/queries/dashboard";
 
 interface TransactionListProps {
-  transactions: DashboardTransaction[];
+  teamId: string;
+  initialPage: TransactionHistoryPageDto;
 }
 
-export function TransactionList({ transactions }: TransactionListProps) {
+export function TransactionList({ teamId, initialPage }: TransactionListProps) {
+  const [transactions, setTransactions] = useState(initialPage.transactions);
+  const [nextCursor, setNextCursor] = useState(initialPage.nextCursor);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+
+  function loadNextPage() {
+    if (!nextCursor || isPending) {
+      return;
+    }
+
+    startTransition(async () => {
+      try {
+        const result = await loadMoreTransactionHistory(teamId, nextCursor);
+
+        if (result.status === "error") {
+          setErrorMessage(result.message);
+          return;
+        }
+
+        setTransactions((currentTransactions) => {
+          const existingIds = new Set(
+            currentTransactions.map((transaction) => transaction.id),
+          );
+          const unseenTransactions = result.page.transactions.filter(
+            (transaction) => !existingIds.has(transaction.id),
+          );
+
+          return [...currentTransactions, ...unseenTransactions];
+        });
+        setNextCursor(result.page.nextCursor);
+        setErrorMessage(null);
+      } catch {
+        setErrorMessage(
+          "We could not load more history. Wait a moment and try again.",
+        );
+      }
+    });
+  }
+
   return (
     <Card className="glass-panel animate-entry border-white/75 bg-white/82 [animation-delay:220ms]">
       <CardHeader className="space-y-2">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle className="text-xl">Transaction history</CardTitle>
           <span className="inline-flex w-fit items-center rounded-full bg-muted/70 px-3 py-1 text-xs font-semibold tracking-[0.16em] text-muted-foreground uppercase">
-            {transactions.length} entries
+            {transactions.length} loaded
           </span>
         </div>
         <CardDescription>
@@ -38,7 +83,7 @@ export function TransactionList({ transactions }: TransactionListProps) {
             </p>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
               The shared ledger will start filling up here as soon as an admin
-              or modaretor adds or removes money from the form.
+              or moderator adds or removes money from the form.
             </p>
           </div>
         ) : (
@@ -85,14 +130,12 @@ export function TransactionList({ transactions }: TransactionListProps) {
                           </p>
                           <div className="flex flex-wrap gap-x-4 gap-y-1">
                             <p className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase sm:text-xs sm:tracking-[0.16em]">
-                              {formatTransactionDate(transaction.transactionDate)}
+                              {formatTransactionDateOnly(transaction.transactionDate)}
                             </p>
                             <p className="wrap-break-word text-sm text-muted-foreground">
                               Performed by{" "}
                               <span className="font-medium text-foreground">
-                                {transaction.createdByName ||
-                                  transaction.createdByEmail ||
-                                  "Unknown admin"}
+                                {transaction.createdByName}
                               </span>
                             </p>
                           </div>
@@ -128,6 +171,30 @@ export function TransactionList({ transactions }: TransactionListProps) {
                 </div>
               );
             })}
+            {errorMessage ? (
+              <p
+                role="status"
+                className="rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+              >
+                {errorMessage}
+              </p>
+            ) : null}
+
+            {nextCursor ? (
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                disabled={isPending}
+                onClick={loadNextPage}
+              >
+                {isPending ? "Loading history..." : "Load more transactions"}
+              </Button>
+            ) : (
+              <p className="text-center text-xs text-muted-foreground">
+                All available transactions are loaded.
+              </p>
+            )}
           </div>
         )}
       </CardContent>

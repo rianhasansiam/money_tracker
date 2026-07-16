@@ -7,19 +7,26 @@ datasource db {
 }
 
 model User {
-  id             String          @id @default(cuid())
-  name           String?
-  email          String?         @unique
-  emailVerified  DateTime?
-  image          String?
-  role           UserRole        @default(MEMBER)
-  accounts       Account[]
-  sessions       Session[]
-  authenticators Authenticator[]
-  transactions   Transaction[]   @relation("TransactionActor")
-  teamMemberships TeamMembership[] @relation("TeamMembershipUser")
+  id                  String           @id @default(cuid())
+  name                String?
+  email               String?          @unique
+  emailVerified       DateTime?
+  image               String?
+  role                UserRole         @default(MEMBER)
+  status              UserStatus       @default(PENDING)
+  lastAuthenticatedAt DateTime?
+  disabledAt          DateTime?
+  deletedAt           DateTime?
+  accounts            Account[]
+  sessions            Session[]
+  authenticators      Authenticator[]
+  transactions        Transaction[]    @relation("TransactionActor")
+  teamMemberships     TeamMembership[] @relation("TeamMembershipUser")
   approvedMemberships TeamMembership[] @relation("TeamMembershipApprovedBy")
-  createdTeams   Team[]          @relation("TeamCreator")
+  createdTeams        Team[]           @relation("TeamCreator")
+  deletedTeams        Team[]           @relation("TeamDeletedBy")
+  sentInvitations     Invitation[]     @relation("InvitationInviter")
+  receivedInvitation  Invitation?      @relation("InvitationUser")
 }
 
 model Account {
@@ -46,6 +53,7 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
+  createdAt    DateTime @default(now())
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
@@ -74,20 +82,25 @@ model Authenticator {
 }
 
 model Transaction {
-  id              String          @id @default(cuid())
-  teamId          String
-  userId          String
-  type            TransactionType
-  amountInCents   Int
-  note            String?         @db.VarChar(240)
-  transactionDate DateTime        @db.Date
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  team            Team            @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  createdBy       User            @relation("TransactionActor", fields: [userId], references: [id], onDelete: Cascade)
+  id                String          @id @default(cuid())
+  teamId            String
+  userId            String?
+  idempotencyKey    String          @db.VarChar(64)
+  actorIdSnapshot   String
+  actorNameSnapshot String
+  type              TransactionType
+  amountInCents     Int
+  note              String?         @db.VarChar(240)
+  transactionDate   DateTime        @db.Date
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  team              Team            @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  createdBy         User?           @relation("TransactionActor", fields: [userId], references: [id], onDelete: SetNull)
 
+  @@unique([teamId, idempotencyKey])
   @@index([userId, transactionDate, createdAt])
-  @@index([teamId, transactionDate, createdAt])
+  @@index([teamId, transactionDate, createdAt, id])
+  @@index([teamId, type])
   @@index([transactionDate, createdAt, id])
 }
 
@@ -96,13 +109,73 @@ model Team {
   name         String           @unique @db.VarChar(80)
   description  String?          @db.VarChar(240)
   createdById  String
+  deletedById  String?
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
-  createdBy    User             @relation("TeamCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  deletedAt    DateTime?
+  purgeAfter   DateTime?
+  createdBy    User             @relation("TeamCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  deletedBy    User?            @relation("TeamDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull)
   memberships  TeamMembership[]
   transactions Transaction[]
 
   @@index([createdById])
+  @@index([deletedAt, purgeAfter])
+  @@index([deletedById])
+}
+
+model Invitation {
+  id                String           @id @default(cuid())
+  email             String           @unique @db.VarChar(254)
+  status            InvitationStatus @default(PENDING)
+  expiresAt         DateTime
+  acceptedAt        DateTime?
+  revokedAt         DateTime?
+  invitedById       String?
+  provisionedUserId String?          @unique
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  inviter           User?            @relation("InvitationInviter", fields: [invitedById], references: [id], onDelete: SetNull)
+  provisionedUser   User?            @relation("InvitationUser", fields: [provisionedUserId], references: [id], onDelete: SetNull)
+
+  @@index([status, expiresAt])
+  @@index([invitedById])
+}
+
+/// Append-only security and administrative record. The migration installs a
+/// database trigger that rejects UPDATE/DELETE outside an explicit maintenance
+/// transaction. Snapshot identifiers deliberately have no foreign keys, so
+/// user/team lifecycle operations cannot cascade into audit history.
+model AuditEvent {
+  id                String   @id @default(cuid())
+  action            String   @db.VarChar(80)
+  actorUserId       String?  @db.VarChar(191)
+  actorIdSnapshot   String   @db.VarChar(191)
+  actorNameSnapshot String   @db.VarChar(160)
+  targetType        String   @db.VarChar(40)
+  targetIdSnapshot  String   @db.VarChar(191)
+  teamIdSnapshot    String?  @db.VarChar(191)
+  correlationId     String   @db.VarChar(64)
+  metadata          Json?
+  createdAt         DateTime @default(now())
+
+  @@index([action, createdAt])
+  @@index([actorUserId, createdAt])
+  @@index([targetType, targetIdSnapshot, createdAt])
+  @@index([teamIdSnapshot, createdAt])
+  @@index([correlationId])
+}
+
+model RateLimitBucket {
+  id          String   @id @default(cuid())
+  scope       String   @db.VarChar(64)
+  subjectHash String   @db.VarChar(64)
+  windowStart DateTime
+  count       Int      @default(0)
+  expiresAt   DateTime
+
+  @@unique([scope, subjectHash, windowStart])
+  @@index([expiresAt])
 }
 
 model TeamMembership {
@@ -126,19 +199,33 @@ model TeamMembership {
 
 enum UserRole {
   ADMIN
-  MODARETOR
+  MODERATOR
   MEMBER
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  DISABLED
+  DELETED
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
 }
 
 enum TeamMemberRole {
   ADMIN
-  MODARETOR
+  MODERATOR
   MEMBER
 }
 
 enum TeamMembershipStatus {
   PENDING
   APPROVED
+  REVOKED
 }
 
 enum TransactionType {

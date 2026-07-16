@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import {
+  type FormEvent,
+  useEffect,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CalendarDays, Coins, FileText, Landmark } from "lucide-react";
 import { useForm, useWatch } from "react-hook-form";
@@ -18,6 +24,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { getBusinessTodayDateInputValue } from "@/lib/date-time";
+import { applyServerFieldErrors } from "@/lib/server-field-errors";
+import {
+  getOrCreateTransactionOperation,
+  type PendingTransactionOperation,
+} from "@/lib/transaction-operation";
 import { cn } from "@/lib/utils";
 import {
   getTransactionFormDefaults,
@@ -25,7 +37,6 @@ import {
   type TransactionTypeValue,
   transactionFormSchema,
 } from "@/lib/validators/transaction";
-import { getTodayDateInputValue } from "@/lib/money";
 
 interface TransactionFormProps {
   teamId: string;
@@ -57,6 +68,10 @@ export function TransactionForm({
 }: TransactionFormProps) {
   const [serverMessage, setServerMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  // A ref updates synchronously across two submit events in the same render.
+  // React state alone can be stale during a double click, which would allow
+  // each event to generate a different idempotency key.
+  const pendingOperationRef = useRef<PendingTransactionOperation | null>(null);
 
   const form = useForm<TransactionFormValues>({
     resolver: zodResolver(transactionFormSchema),
@@ -73,20 +88,39 @@ export function TransactionForm({
   async function submitTransaction(values: TransactionFormValues) {
     setServerMessage(null);
 
-    const result = await createTransaction(teamId, values);
+    const operation = getOrCreateTransactionOperation(
+      pendingOperationRef.current,
+      values,
+      () => crypto.randomUUID(),
+    );
+    pendingOperationRef.current = operation;
+
+    let result: Awaited<ReturnType<typeof createTransaction>>;
+
+    try {
+      result = await createTransaction(
+        teamId,
+        operation.key,
+        values,
+      );
+    } catch {
+      const message =
+        "We could not confirm the response. Submit the unchanged form again to safely check the same operation.";
+      setServerMessage(message);
+      toast.error(message);
+      return;
+    }
 
     if (result.status === "error") {
-      if (result.fieldErrors) {
-        for (const [key, message] of Object.entries(result.fieldErrors)) {
-          if (!message) {
-            continue;
-          }
+      if (result.code === "IDEMPOTENCY_CONFLICT") {
+        pendingOperationRef.current = null;
+      }
 
-          form.setError(key as keyof TransactionFormValues, {
-            type: "server",
-            message,
-          });
-        }
+      if (result.fieldErrors) {
+        applyServerFieldErrors<TransactionFormValues>(
+          form.setError,
+          result.fieldErrors,
+        );
       }
 
       setServerMessage(result.message);
@@ -94,11 +128,13 @@ export function TransactionForm({
       return;
     }
 
+    pendingOperationRef.current = null;
+
     form.reset({
       amount: "",
       note: "",
       type: values.type,
-      transactionDate: getTodayDateInputValue(),
+      transactionDate: getBusinessTodayDateInputValue(),
     });
     onPreferredTypeChange(values.type);
     toast.success(result.message);
@@ -108,6 +144,16 @@ export function TransactionForm({
     control: form.control,
     name: "type",
   });
+
+  function handleFormSubmit(event: FormEvent<HTMLFormElement>) {
+    void form.handleSubmit((values) => {
+      form.clearErrors();
+
+      startTransition(() => {
+        void submitTransaction(values);
+      });
+    })(event);
+  }
 
   return (
     <Card
@@ -124,13 +170,7 @@ export function TransactionForm({
       <CardContent className="px-5 pb-5 sm:px-6 sm:pb-6">
         <form
           className="space-y-4 sm:space-y-5"
-          onSubmit={form.handleSubmit((values) => {
-            form.clearErrors();
-
-            startTransition(() => {
-              void submitTransaction(values);
-            });
-          })}
+          onSubmit={handleFormSubmit}
         >
           <div className="space-y-2">
             <Label htmlFor="type">Transaction type</Label>
@@ -202,7 +242,7 @@ export function TransactionForm({
                 <Input
                   id="transactionDate"
                   type="date"
-                  max={getTodayDateInputValue()}
+                  max={getBusinessTodayDateInputValue()}
                   className="pl-10"
                   {...form.register("transactionDate")}
                 />

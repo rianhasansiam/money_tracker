@@ -6,7 +6,7 @@ import { BalanceCard } from "@/components/dashboard/balance-card";
 import { TransactionForm } from "@/components/dashboard/transaction-form";
 import { TransactionList } from "@/components/dashboard/transaction-list";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
-import type { DashboardTransaction } from "@/lib/queries/dashboard";
+import type { TransactionHistoryPageDto } from "@/lib/queries/dashboard";
 import type { TeamMembershipRoleValue } from "@/lib/queries/groups";
 import { formatRoleLabel } from "@/lib/roles";
 import type { TransactionTypeValue } from "@/lib/validators/transaction";
@@ -19,7 +19,7 @@ interface DashboardShellProps {
   balanceInCents: number;
   totalAddedInCents: number;
   totalRemovedInCents: number;
-  transactions: DashboardTransaction[];
+  transactionHistory: TransactionHistoryPageDto;
 }
 
 export function DashboardShell({
@@ -30,7 +30,7 @@ export function DashboardShell({
   balanceInCents,
   totalAddedInCents,
   totalRemovedInCents,
-  transactions,
+  transactionHistory,
 }: DashboardShellProps) {
   const [preferredType, setPreferredType] =
     useState<TransactionTypeValue>("ADD");
@@ -49,7 +49,10 @@ export function DashboardShell({
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_24rem]">
         <div className="order-2 space-y-6 xl:order-1">
-          <TransactionList transactions={transactions} />
+          <TransactionList
+            teamId={teamId}
+            initialPage={transactionHistory}
+          />
         </div>
 
         <aside className="order-1 space-y-6 xl:order-2 xl:sticky xl:top-6 xl:self-start">
@@ -70,7 +73,7 @@ export function DashboardShell({
                     <CardTitle className="text-base">View-only access</CardTitle>
                     <CardDescription className="mt-1 text-sm leading-6">
                       Your current role for this team is {roleLabel}. Members can
-                      review balances and history, but only admins and modaretors
+                      review balances and history, but only admins and moderators
                       can save transactions.
                     </CardDescription>
                   </div>
@@ -79,7 +82,7 @@ export function DashboardShell({
                 <div className="rounded-2xl border border-white/70 bg-muted/45 p-4">
                   <p className="text-sm leading-6 text-muted-foreground">
                     If a team manager changes your membership role from Member to
-                    Admin or Modaretor in the database, the transaction form will
+                    Admin or Moderator in the database, the transaction form will
                     unlock the next time you load this dashboard.
                   </p>
                 </div>
@@ -97,7 +100,7 @@ export function DashboardShell({
                   <CardTitle className="text-base">Team-aware permissions</CardTitle>
                   <CardDescription className="mt-1 text-sm leading-6">
                     Approved members of this group can view the dashboard, while
-                    only admins and modaretors can add or remove money.
+                    only admins and moderators can add or remove money.
                   </CardDescription>
                 </div>
               </div>
