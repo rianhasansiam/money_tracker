@@ -3,23 +3,23 @@
 import { RecoveryPanel } from "@/components/system/recovery-panel";
 
 interface DashboardErrorProps {
-  error: Error & { digest?: string };
-  unstable_retry: () => void;
+  error: unknown;
+  retry: () => void;
 }
 
 export default function DashboardError({
   error,
-  unstable_retry,
+  retry,
 }: DashboardErrorProps) {
   void error;
 
   return (
     <RecoveryPanel
       title="The dashboard could not be loaded"
-      description="No transaction was created or changed. Retry the dashboard, or return to your groups."
-      onRetry={unstable_retry}
+      description="Retry loading the ledger, or return to Teams. If you were saving an entry, check the history before repeating it."
+      onRetry={retry}
       backHref="/groups"
-      backLabel="Return to groups"
+      backLabel="Return to Teams"
     />
   );
 }

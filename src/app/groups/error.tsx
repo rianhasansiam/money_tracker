@@ -3,21 +3,21 @@
 import { RecoveryPanel } from "@/components/system/recovery-panel";
 
 interface GroupsErrorProps {
-  error: Error & { digest?: string };
-  unstable_retry: () => void;
+  error: unknown;
+  retry: () => void;
 }
 
 export default function GroupsError({
   error,
-  unstable_retry,
+  retry,
 }: GroupsErrorProps) {
   void error;
 
   return (
     <RecoveryPanel
-      title="Your groups could not be loaded"
-      description="No membership or team data was changed. Try again, or return to the home page."
-      onRetry={unstable_retry}
+      title="Your teams could not be loaded"
+      description="Try loading your teams again. Check the current membership state before repeating an action."
+      onRetry={retry}
       backHref="/"
       backLabel="Return home"
     />

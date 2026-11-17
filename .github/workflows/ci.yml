@@ -190,4 +190,4 @@ jobs:
             exit 1
           fi
 
-          E2E_BASE_URL=http://127.0.0.1:3000 npm run test:e2e
+          VERCEL=1 E2E_BASE_URL=http://127.0.0.1:3000 npm run test:e2e

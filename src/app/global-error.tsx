@@ -4,13 +4,13 @@ import { RecoveryPanel } from "@/components/system/recovery-panel";
 import "./globals.css";
 
 interface GlobalErrorProps {
-  error: Error & { digest?: string };
-  unstable_retry: () => void;
+  error: unknown;
+  retry: () => void;
 }
 
 export default function GlobalError({
   error,
-  unstable_retry,
+  retry,
 }: GlobalErrorProps) {
   void error;
 
@@ -20,8 +20,8 @@ export default function GlobalError({
         <title>Unable to load | Money Tracker</title>
         <RecoveryPanel
           title="Money Tracker is temporarily unavailable"
-          description="Your financial data has not been displayed or changed. Try again, or return to the home page."
-          onRetry={unstable_retry}
+          description="Try loading the workspace again, or return to the home page. If you were saving an entry, check the ledger before repeating it."
+          onRetry={retry}
           backHref="/"
           backLabel="Return home"
         />

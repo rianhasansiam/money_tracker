@@ -41,11 +41,12 @@ export type GroupActionResult =
       status: "error";
       message: string;
       retryAfterSeconds?: number;
+      code?: "RECENT_AUTHENTICATION_REQUIRED";
       fieldErrors?: Partial<Record<keyof CreateTeamFormValues, string>>;
     };
 
 const GROUP_ACTION_UNAVAILABLE_MESSAGE =
-  "This group request cannot be processed. Refresh the page and try again.";
+  "This team request cannot be processed. Refresh the page and try again.";
 const SERIALIZABLE_ATTEMPTS = 3;
 
 class GroupActionUnavailableError extends Error {
@@ -268,7 +269,7 @@ export async function createTeam(
     return {
       status: "success",
       message: viewsUpdated
-        ? "Team created. You are now its administrator."
+        ? "Team created. You are its Owner and first Team Admin."
         : "Team created. Refresh the page to update this view.",
       teamId: team.id,
     };
@@ -354,6 +355,7 @@ export async function quarantineTeamAction(
     if (result.status === "recent_authentication_required") {
       return {
         status: "error",
+        code: "RECENT_AUTHENTICATION_REQUIRED",
         message:
           "For safety, sign out and sign in again before quarantining a team.",
       };

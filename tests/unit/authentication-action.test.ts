@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { RateLimitExceededError } from "@/lib/rate-limit";
+import { RateLimitExceededError, RateLimitUnavailableError } from "@/lib/rate-limit";
 
 const mocks = vi.hoisted(() => ({
   enforceIpRateLimit: vi.fn(),
@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   logServerEvent: vi.fn(),
   redirect: vi.fn(),
   signIn: vi.fn(),
+  signOut: vi.fn(),
 }));
 
 vi.mock("next/headers", () => ({
@@ -20,6 +21,7 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("@/lib/auth", () => ({
   signIn: mocks.signIn,
+  signOut: mocks.signOut,
 }));
 
 vi.mock("@/lib/observability", async (importOriginal) => {
@@ -55,7 +57,7 @@ vi.mock("@/lib/rate-limit", () => {
   };
 });
 
-import { beginGoogleSignIn } from "@/actions/authentication";
+import { beginGoogleSignIn, beginReauthentication } from "@/actions/authentication";
 
 describe("Google authentication entry action", () => {
   beforeEach(() => {
@@ -84,6 +86,7 @@ describe("Google authentication entry action", () => {
       limit: 20,
       windowSeconds: 300,
     });
+    expect(mocks.enforceIpRateLimit).toHaveBeenCalledTimes(1);
     expect(mocks.signIn).toHaveBeenCalledWith("google", {
       redirectTo: "/dashboard",
     });
@@ -134,5 +137,24 @@ describe("Google authentication entry action", () => {
     expect(mocks.signIn).toHaveBeenCalledWith("google", {
       redirectTo: "/groups",
     });
+  });
+
+  it("fails closed when the shared durable limiter is unavailable", async () => {
+    mocks.getConfiguredTrustedClientIp.mockReturnValue("203.0.113.22");
+    mocks.enforceIpRateLimit.mockRejectedValue(new RateLimitUnavailableError());
+    await expect(beginGoogleSignIn()).rejects.toThrow("redirect:/login?authError=unavailable");
+    expect(mocks.enforceIpRateLimit).toHaveBeenCalledTimes(1);
+    expect(mocks.signIn).not.toHaveBeenCalled();
+  });
+
+  it("reauthenticates through sign-out and a validated internal return without replaying a mutation", async () => {
+    await beginReauthentication("/admin?view=recovery&recoveryQ=Treasury&operation=purge");
+    const target = mocks.signOut.mock.calls.at(-1)?.[0].redirectTo as string;
+    const url = new URL(target, "https://local.invalid");
+    expect(url.pathname).toBe("/login");
+    expect(url.searchParams.get("reauth")).toBe("1");
+    expect(url.searchParams.get("returnTo")).toBe("/admin?view=recovery&recoveryQ=Treasury");
+    expect(mocks.signIn).not.toHaveBeenCalled();
+    expect(mocks.enforceIpRateLimit).not.toHaveBeenCalled();
   });
 });

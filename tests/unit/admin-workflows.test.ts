@@ -364,6 +364,40 @@ describe("authorized administrative workflows", () => {
     });
   });
 
+  it.each(["accounts", "invitations", "access", "recovery"] as const)("loads only the selected %s collection", async (view) => {
+    const tx = transactionClient();
+    tx.user.findFirst.mockResolvedValue({ name: "Security Admin" });
+    tx.user.findMany.mockResolvedValue([]);
+    tx.invitation.findMany.mockResolvedValue([]);
+    tx.team.findMany.mockResolvedValue([]);
+    const { workflows } = repository(tx);
+    const result = await workflows.getConsoleData("administrator-internal-id", undefined, {}, view);
+    expect(result).not.toBeNull();
+    expect(tx.user.findMany).toHaveBeenCalledTimes(view === "accounts" ? 1 : 0);
+    expect(tx.invitation.findMany).toHaveBeenCalledTimes(view === "invitations" ? 1 : 0);
+    expect(tx.team.findMany).toHaveBeenCalledTimes(view === "access" || view === "recovery" ? 1 : 0);
+    expect(tx.teamMembership.findMany).not.toHaveBeenCalled();
+    if (view === "recovery") expect(tx.team.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({ deletedAt: { not: null } }),
+      select: expect.objectContaining({ memberships: undefined }),
+    }));
+    if (view === "access") expect(tx.team.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: expect.objectContaining({ deletedAt: null }) }));
+  });
+
+  it("ignores hidden-task cursors and retains live authorization for selected reads", async () => {
+    const tx = transactionClient();
+    tx.user.findFirst.mockResolvedValue({ name: "Security Admin" });
+    tx.user.findMany.mockResolvedValue([]);
+    const result = await repository(tx).workflows.getConsoleData("administrator-internal-id", undefined, { invitations: "malformed", teams: "invalid" }, "accounts");
+    expect(result?.users).toEqual([]);
+    expect(tx.invitation.findFirst).not.toHaveBeenCalled();
+    expect(tx.team.findFirst).not.toHaveBeenCalled();
+    const denied = transactionClient();
+    denied.user.findFirst.mockResolvedValue(null);
+    expect(await repository(denied).workflows.getConsoleData("member-id", undefined, {}, "invitations")).toBeNull();
+    expect(denied.invitation.findMany).not.toHaveBeenCalled();
+  });
+
   it("disables an active non-owner and atomically revokes sessions and audits", async () => {
     const tx = transactionClient();
     const { workflows } = repository(tx);

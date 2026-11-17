@@ -1,22 +1,15 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { GET as getHealth } from "@/app/api/health/route";
-import { runReadinessProbe } from "@/lib/health";
 
-const databaseMocks = vi.hoisted(() => ({
-  queryRaw: vi.fn(),
+const readinessMocks = vi.hoisted(() => ({
+  check: vi.fn(),
 }));
 
-vi.mock("@/lib/db", () => ({
-  db: {
-    $queryRaw: databaseMocks.queryRaw,
-  },
+vi.mock("@/lib/readiness", () => ({
+  checkDatabaseReadiness: readinessMocks.check,
 }));
 
 import { GET as getReadiness } from "@/app/api/ready/route";
-
-afterEach(() => {
-  vi.useRealTimers();
-});
 
 describe("health and readiness", () => {
   it("returns a generic, uncached liveness response", async () => {
@@ -29,25 +22,24 @@ describe("health and readiness", () => {
       /^[0-9a-f-]{36}$/,
     );
     expect(response.headers.get("x-robots-tag")).toBe("noindex, noarchive");
+    expect(readinessMocks.check).not.toHaveBeenCalled();
   });
 
   it("returns ready without serializing database details", async () => {
-    databaseMocks.queryRaw.mockResolvedValueOnce([{ ready: 1 }]);
+    readinessMocks.check.mockResolvedValueOnce(true);
 
     const response = await getReadiness();
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ status: "ready" });
-    expect(databaseMocks.queryRaw).toHaveBeenCalledTimes(1);
+    expect(readinessMocks.check).toHaveBeenCalledTimes(1);
   });
 
   it("returns a generic 503 and correlated warning when the database is unavailable", async () => {
     const consoleWarn = vi
       .spyOn(console, "warn")
       .mockImplementation(() => undefined);
-    databaseMocks.queryRaw.mockRejectedValueOnce(
-      new Error("postgresql://user:password@private-host/database"),
-    );
+    readinessMocks.check.mockResolvedValueOnce(false);
 
     const response = await getReadiness();
     const body = await response.json();
@@ -62,17 +54,4 @@ describe("health and readiness", () => {
       correlationId: response.headers.get("x-correlation-id"),
     });
   });
-
-  it("fails a stalled readiness dependency within the configured bound", async () => {
-    vi.useFakeTimers();
-
-    const result = runReadinessProbe(
-      () => new Promise(() => undefined),
-      25,
-    );
-
-    await vi.advanceTimersByTimeAsync(25);
-    await expect(result).resolves.toBe(false);
-  });
 });
-

@@ -11,13 +11,13 @@ export function LoadingPanel({ label = "Loading Money Tracker" }: LoadingPanelPr
       aria-busy="true"
     >
       <section
-        className="glass-panel animate-entry w-full max-w-md rounded-[2rem] border border-white/75 px-6 py-9 text-center sm:px-10 sm:py-11"
+        className="w-full max-w-md rounded-xl border border-border px-6 py-9 text-center sm:px-10 sm:py-11"
         role="status"
         aria-live="polite"
         aria-atomic="true"
       >
         <div className="relative mx-auto h-16 w-16" aria-hidden="true">
-          <div className="absolute inset-0 animate-spin rounded-full border-2 border-primary/15 border-t-primary motion-reduce:animate-none" />
+          <div className="absolute inset-0 animate-spin rounded-lg border-2 border-primary/15 border-t-primary motion-reduce:animate-none" />
           <div className="absolute inset-2 flex items-center justify-center rounded-full bg-primary/12 text-primary shadow-sm">
             <WalletCards className="h-6 w-6" strokeWidth={1.8} />
           </div>

@@ -201,4 +201,18 @@ describe("createTransaction action boundary", () => {
     });
     expect(result.message).toContain("The ledger is saved");
   });
+
+  it("marks an unclassified write failure as an unknown outcome for unchanged-key recovery", async () => {
+    const errorLog = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    actionMocks.createTeamTransaction.mockRejectedValueOnce(new Error("Acknowledgement unavailable"));
+    try {
+      const result = await createTransaction(validTeamId, operationKey, validInput);
+      expect(result).toMatchObject({ status: "error", code: "OUTCOME_UNKNOWN" });
+      expect(result.message).toContain("Submit the unchanged form again");
+      expect(actionMocks.refresh).not.toHaveBeenCalled();
+      expect(actionMocks.createTeamTransaction).toHaveBeenCalledTimes(1);
+    } finally {
+      errorLog.mockRestore();
+    }
+  });
 });

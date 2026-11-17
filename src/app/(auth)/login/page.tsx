@@ -1,7 +1,11 @@
 import { redirect } from "next/navigation";
-import { LockKeyhole, ShieldCheck, TrendingUp } from "lucide-react";
+import Link from "next/link";
+import { LockKeyhole, ShieldCheck, WalletCards } from "lucide-react";
 import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
-import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
+import { ReauthenticateButton } from "@/components/auth/reauthenticate-button";
+import { safeAuthenticationReturn } from "@/lib/auth-return";
+import { Separator } from "@/components/ui/separator";
+import { Feedback } from "@/components/ui/feedback";
 import { auth } from "@/lib/auth";
 
 export const metadata = {
@@ -13,17 +17,21 @@ interface LoginPageProps {
     authError?: string | string[];
     retryAfter?: string | string[];
     reference?: string | string[];
+    reauth?: string | string[];
+    returnTo?: string | string[];
   }>;
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const session = await auth();
+  const query = await searchParams;
+  const returnTo = safeAuthenticationReturn(query.returnTo);
+  const reauth = query.reauth === "1";
 
-  if (session?.user?.id) {
-    redirect("/groups");
+  if (session?.user?.id && !reauth) {
+    redirect(returnTo);
   }
 
-  const query = await searchParams;
   const authError =
     typeof query.authError === "string" ? query.authError : null;
   const retryAfterValue =
@@ -53,97 +61,33 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         : null;
 
   return (
-    <main className="page-shell min-h-screen px-3 py-5 sm:px-6 lg:px-8">
-      <div className="mx-auto grid min-h-[calc(100vh-3rem)] w-full max-w-6xl items-center gap-8 lg:grid-cols-[0.94fr_1.06fr]">
-        <div className="animate-entry space-y-6 [animation-delay:120ms]">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/80 px-3 py-1 text-sm font-medium text-muted-foreground shadow-sm">
-            <LockKeyhole className="h-4 w-4 text-primary" />
-            Protected team finance workspace
-          </div>
-
-          <div className="space-y-4">
-            <h1 className="max-w-xl text-3xl font-semibold tracking-tight text-balance sm:text-5xl">
-              Access your invited team workspace with Google.
-            </h1>
-            <p className="max-w-lg text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8">
-              Sign in with the Google identity provisioned by an administrator,
-              then open only the groups and dashboards you are authorized to use.
-            </p>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {[
-              {
-                icon: TrendingUp,
-                title: "Live balance",
-                description: "Each approved team sees its own balance and transaction history.",
-              },
-              {
-                icon: ShieldCheck,
-                title: "Protected routes",
-                description: "Only approved members can open a team dashboard after sign-in.",
-              },
-              {
-                icon: LockKeyhole,
-                title: "Permanent history",
-                description:
-                  "Every transaction is stored in PostgreSQL with the acting team admin or moderator.",
-              },
-            ].map((item, index) => (
-              <Card
-                key={item.title}
-                className="glass-panel animate-entry border-white/70 bg-white/75"
-                style={{ animationDelay: `${240 + index * 70}ms` }}
-              >
-                <CardContent className="space-y-3 p-5">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/12 text-primary">
-                    <item.icon className="h-5 w-5" />
-                  </div>
-                  <CardTitle className="text-base">{item.title}</CardTitle>
-                  <CardDescription className="text-sm leading-6">
-                    {item.description}
-                  </CardDescription>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+    <main className="mx-auto grid min-h-screen w-full max-w-6xl items-center gap-10 px-4 py-10 sm:px-8 lg:grid-cols-2 lg:gap-16">
+      <section className="space-y-6">
+        <Link href="/" className="inline-flex min-h-11 items-center gap-3 rounded-lg font-semibold">
+          <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-white"><WalletCards aria-hidden="true" className="h-5 w-5" /></span>
+          Money Tracker
+        </Link>
+        <div className="space-y-4">
+          <p className="text-xs font-semibold uppercase tracking-widest text-primary">Your shared ledger</p>
+          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Sign in to Money Tracker</h1>
+          <p className="max-w-lg text-base leading-7 text-muted-foreground">One clear view of your team’s money. Review the balance, record transactions, and keep the whole team on the same page.</p>
         </div>
-
-        <div className="animate-entry [animation-delay:220ms]">
-          <div className="glass-panel rounded-4xl border border-white/75 p-4 shadow-[0_30px_90px_rgb(22_38_60_/0.14)] sm:p-6">
-            <div className="rounded-3xl bg-white/90 p-6 ring-1 ring-black/5 sm:p-8">
-              <div className="space-y-3">
-                <p className="text-sm font-semibold tracking-[0.22em] text-muted-foreground uppercase">
-                  Welcome back
-                </p>
-                <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-                  Sign in to Money Tracker
-                </h2>
-                <p className="text-sm leading-6 text-muted-foreground">
-                  Use the invited Google account associated with this workspace.
-                  Unprovisioned identities cannot establish an application session.
-                </p>
-              </div>
-
-              <div className="mt-8 space-y-4">
-                {authErrorMessage ? (
-                  <p
-                    role="alert"
-                    className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900"
-                  >
-                    {authErrorMessage}
-                  </p>
-                ) : null}
-                <GoogleSignInButton redirectTo="/groups" />
-                <p className="text-sm leading-6 text-muted-foreground">
-                  By continuing, you will authenticate with Google. Access is
-                  granted only after server-side admission checks succeed.
-                </p>
-              </div>
-            </div>
-          </div>
+        <ul className="space-y-4 text-sm leading-6 text-muted-foreground">
+          <li className="flex gap-3"><ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" /><span>Your invitation admits your Google account. A team Admin or Moderator separately approves access to each team ledger.</span></li>
+          <li className="flex gap-3"><LockKeyhole className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" /><span>Your role controls whether you can review the ledger or also record money added and removed.</span></li>
+        </ul>
+      </section>
+      <section className="rounded-xl border border-border bg-card p-6 shadow-xs sm:p-8" aria-labelledby="google-sign-in-title">
+        <h2 id="google-sign-in-title" className="text-xl font-semibold">{reauth ? "Sign in again to confirm it is you" : "Continue with your invited account"}</h2>
+        <p className="mt-3 text-sm leading-6 text-muted-foreground">Use the Google email invited by your administrator. If you need an invitation, contact your workspace administrator.</p>
+        <div className="mt-6 space-y-4">
+          {authErrorMessage ? <Feedback tone="warning">{authErrorMessage}</Feedback> : null}
+          {reauth ? <Feedback tone="warning">Sensitive changes require a Google sign-in within the last 15 minutes. Signing in again revokes older Money Tracker sessions on other devices. You will return to the selected screen and must review and confirm your change again. Unsaved sensitive input is not restored.</Feedback> : null}
+          {session?.user?.id ? <ReauthenticateButton returnTo={returnTo} /> : <GoogleSignInButton redirectTo={returnTo} />}
+          <Separator className="bg-border" />
+          <p className="text-sm leading-6 text-muted-foreground">Google verifies your identity. Your workspace administrator manages access to Money Tracker.</p>
         </div>
-      </div>
+      </section>
     </main>
   );
 }

@@ -1,5 +1,5 @@
-import { db } from "@/lib/db";
-import { buildHealthHeaders, runReadinessProbe } from "@/lib/health";
+import { buildHealthHeaders } from "@/lib/health";
+import { checkDatabaseReadiness } from "@/lib/readiness";
 import {
   createCorrelationId,
   logServerEvent,
@@ -11,9 +11,7 @@ export const runtime = "nodejs";
 
 export async function GET() {
   const correlationId = createCorrelationId();
-  const isReady = await runReadinessProbe(async () => {
-    await db.$queryRaw`SELECT 1`;
-  });
+  const isReady = await checkDatabaseReadiness();
 
   if (!isReady) {
     logServerEvent(

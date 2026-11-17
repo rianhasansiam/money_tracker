@@ -1,516 +1,127 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Building2, Clock3, Users } from "lucide-react";
+import { Building2, ChevronRight, Plus, ShieldCheck } from "lucide-react";
 import { SignOutButton } from "@/components/auth/sign-out-button";
-import { CreateTeamForm } from "@/components/groups/create-team-form";
 import { ApproveRequestButton } from "@/components/groups/approve-request-button";
+import { CreateTeamForm } from "@/components/groups/create-team-form";
 import { DeleteTeamButton } from "@/components/groups/delete-team-button";
 import { RequestAccessButton } from "@/components/groups/request-access-button";
+import { ApprovedTeamSwitcher } from "@/components/system/approved-team-switcher";
+import { EmptyState } from "@/components/system/empty-state";
+import { WorkspaceHeader } from "@/components/system/workspace-header";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Feedback } from "@/components/ui/feedback";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { auth } from "@/lib/auth";
 import { formatTimestampInBusinessTimeZone } from "@/lib/date-time";
-import { getRateLimitedGroupsPageData } from "@/lib/queries/groups";
-import {
-  RateLimitExceededError,
-  RateLimitUnavailableError,
-} from "@/lib/rate-limit";
-import {
-  canCreateOrDeleteGroups,
-  canManageTeamMembership,
-  formatRoleLabel,
-} from "@/lib/roles";
-import type { GroupsPageCursors } from "@/lib/queries/groups";
+import { getRateLimitedTeamsWorkspaceData } from "@/lib/queries/teams";
+import { RateLimitExceededError, RateLimitUnavailableError } from "@/lib/rate-limit";
+import { canCreateOrDeleteGroups, formatRoleLabel } from "@/lib/roles";
+import { parseTeamsLocation, teamsPageHref, type TeamsView, type TeamsViewCursors } from "@/lib/validators/teams-view";
 
-export const metadata = {
-  title: "Groups",
+export const metadata = { title: "Teams" };
+const viewLabels: Record<TeamsView, string> = {
+  teams: "Your teams", discover: "Discover teams", requests: "Your requests", approvals: "Approvals",
 };
 
-interface GroupsPageProps {
-  searchParams: Promise<{
-    membershipCursor?: string | string[];
-    availableCursor?: string | string[];
-    approvalCursor?: string | string[];
-  }>;
-}
-
-function singleCursor(value: string | string[] | undefined) {
-  if (value === undefined || typeof value === "string") {
-    return value;
-  }
-
-  return "";
-}
-
-function groupsPageHref(cursors: GroupsPageCursors) {
-  const params = new URLSearchParams();
-
-  if (cursors.memberships) {
-    params.set("membershipCursor", cursors.memberships);
-  }
-
-  if (cursors.availableTeams) {
-    params.set("availableCursor", cursors.availableTeams);
-  }
-
-  if (cursors.adminPendingApprovals) {
-    params.set("approvalCursor", cursors.adminPendingApprovals);
-  }
-
-  const query = params.toString();
-  return query ? `/groups?${query}` : "/groups";
-}
-
-function CollectionPageNavigation({
-  currentCursor,
-  href,
-  label,
-  nextCursor,
-}: {
-  currentCursor?: string;
-  href: string;
-  label: string;
-  nextCursor: string | null;
-}) {
-  if (!currentCursor && !nextCursor) {
-    return null;
-  }
-
-  return (
-    <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 sm:flex-row sm:items-center sm:justify-between">
-      <p>
-        {nextCursor
-          ? `More ${label} exist beyond this bounded page.`
-          : `This is the final page of ${label}.`}
-      </p>
-      {nextCursor ? (
-        <Button asChild variant="outline" size="sm">
-          <Link href={href}>Next page</Link>
-        </Button>
-      ) : null}
+function PageNavigation({ view, cursors, nextCursor, shown }: { view: TeamsView; cursors: TeamsViewCursors; nextCursor: string | null; shown: number }) {
+  return <nav aria-label={`${viewLabels[view]} pagination`} className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
+    <p className="text-xs text-muted-foreground">{shown} shown on this page{nextCursor ? " · More available" : " · End of results"}</p>
+    <div className="flex flex-wrap gap-2">
+      {cursors[view] ? <Button asChild variant="ghost"><Link href={teamsPageHref(view, { ...cursors, [view]: undefined })}>First page</Link></Button> : null}
+      {nextCursor ? <Button asChild variant="outline"><Link href={teamsPageHref(view, { ...cursors, [view]: nextCursor })}>Next page<ChevronRight aria-hidden="true" /></Link></Button> : null}
     </div>
-  );
+  </nav>;
 }
 
-export default async function GroupsPage({ searchParams }: GroupsPageProps) {
+function TeamManagement({ teamId, teamName, returnTo }: { teamId: string; teamName: string; returnTo: string }) {
+  return <details className="mt-4 border-t border-border pt-2">
+    <summary className="flex min-h-11 cursor-pointer list-item items-center text-sm font-medium text-muted-foreground">Team management</summary>
+    <div className="space-y-3 pb-1 pt-2">
+      <p className="text-xs leading-5 text-muted-foreground">Global Admin action. Quarantine stops access and preserves the ledger during its recovery window.</p>
+      <DeleteTeamButton teamId={teamId} teamName={teamName} returnTo={returnTo} />
+    </div>
+  </details>;
+}
+
+export default async function TeamsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const session = await auth();
-
-  if (!session?.user?.id) {
-    redirect("/login");
-  }
-
-  const resolvedSearchParams = await searchParams;
-  const currentCursors: GroupsPageCursors = {
-    memberships: singleCursor(resolvedSearchParams.membershipCursor),
-    availableTeams: singleCursor(resolvedSearchParams.availableCursor),
-    adminPendingApprovals: singleCursor(resolvedSearchParams.approvalCursor),
-  };
-  let groupsData;
-
+  if (!session?.user?.id) redirect("/login");
+  const location = parseTeamsLocation(await searchParams);
+  if (!location) redirect("/groups");
+  let data;
   try {
-    groupsData = await getRateLimitedGroupsPageData(
-      session.user.id,
-      currentCursors,
-    );
+    data = await getRateLimitedTeamsWorkspaceData(session.user.id, location.view, location.cursors);
   } catch (error) {
-    if (
-      error instanceof RateLimitExceededError ||
-      error instanceof RateLimitUnavailableError
-    ) {
-      const message =
-        error instanceof RateLimitExceededError
-          ? `Too many group requests. Try again in ${error.retryAfterSeconds} seconds.`
-          : "Group protection is temporarily unavailable. Wait a moment and try again.";
-
-      return (
-        <main className="page-shell min-h-screen px-3 py-5 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-2xl rounded-3xl border border-white/70 bg-white/85 p-6 shadow-sm">
-            <h1 className="text-xl font-semibold">Groups temporarily paused</h1>
-            <p className="mt-3 text-sm leading-6 text-muted-foreground">
-              {message}
-            </p>
-            <Button asChild variant="outline" className="mt-5">
-              <Link href="/">Back to home</Link>
-            </Button>
-          </div>
-        </main>
-      );
-    }
-
-    throw error;
+    if (!(error instanceof RateLimitExceededError || error instanceof RateLimitUnavailableError)) throw error;
+    return <main className="mx-auto min-h-screen max-w-2xl px-4 py-10"><Feedback tone="warning">{error instanceof RateLimitExceededError ? `Too many team requests. Try again in ${error.retryAfterSeconds} seconds.` : "Team protection is temporarily unavailable. Wait a moment and try again."}</Feedback><Button asChild variant="outline" className="mt-4"><Link href="/">Return home</Link></Button></main>;
   }
+  if (!data) redirect("/groups");
+  const canManage = canCreateOrDeleteGroups(data.globalRole);
+  const viewHref = teamsPageHref(data.view, location.cursors);
+  const shown = data.approvedTeams.length + data.discoverableTeams.length + data.pendingRequests.length + data.incomingRequests.length;
+  const views: TeamsView[] = ["teams", "discover", "requests", ...(data.canReviewRequests ? ["approvals" as const] : [])];
 
-  if (!groupsData) {
-    redirect("/groups");
-  }
+  return <main className="min-h-screen px-4 py-5 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-7xl space-y-6">
+      <WorkspaceHeader active="groups" title="Teams" globalRole={data.globalRole} canAdmin={canManage}
+        description="Open a team you belong to, request access, or review membership requests. Each team has its own ledger and Team role."
+        teamSwitcher={<ApprovedTeamSwitcher userId={session.user.id} />} actions={<SignOutButton />} />
 
-  const firstName = session.user.name?.split(" ")[0] ?? "there";
-  const canManageGroups = canCreateOrDeleteGroups(session.user.role);
+      {!data.hasApprovedTeams ? <Feedback>
+        <p className="font-medium">Your account is active. Request access to a team to view its ledger.</p>
+        <p className="mt-1">{data.hasPendingRequests ? "Your pending requests must be approved by a Team Admin or Team Moderator. You can review those requests or discover another team while you wait." : "Choose Discover teams, find the right team, and request to join. Signing in and team approval are separate steps."}</p>
+      </Feedback> : null}
 
-  return (
-    <main className="page-shell min-h-screen px-3 py-5 sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
-        <header className="animate-entry flex flex-col gap-4 rounded-[1.35rem] border border-white/70 bg-white/75 px-4 py-4 shadow-sm backdrop-blur sm:rounded-[1.75rem] sm:px-6 sm:py-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-w-0">
-            <p className="text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase sm:text-sm sm:tracking-[0.18em]">
-              Group access
-            </p>
-            <h1 className="mt-2 text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
-              Welcome back, {firstName}.
-            </h1>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-              Join the right team, wait for an admin approval when needed, and
-              open only the dashboards you belong to. Members can view team
-              ledgers, while admins and moderators can handle transactions.
-              Only admins can create or delete groups.
-            </p>
-          </div>
-
-          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
-            {canManageGroups ? (
-              <Button asChild variant="outline" className="w-full sm:w-auto">
-                <Link href="/admin">Administration</Link>
-              </Button>
-            ) : null}
-            <SignOutButton className="w-full sm:w-auto" buttonClassName="w-full" />
-          </div>
-        </header>
-
-        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {[
-            {
-              label: "Approved groups",
-              value: groupsData.approvedTeams.length,
-            },
-            {
-              label: "Pending requests",
-              value: groupsData.pendingTeams.length,
-            },
-            {
-              label: "Available groups",
-              value: groupsData.availableTeams.length,
-            },
-          ].map((item, index) => (
-            <Card
-              key={item.label}
-              className="glass-panel animate-entry border-white/75 bg-white/78"
-              style={{ animationDelay: `${90 + index * 70}ms` }}
-            >
-              <CardContent className="flex flex-col items-start justify-between gap-3 p-4 sm:flex-row sm:items-center sm:gap-4 sm:p-5">
-                <div>
-                  <p className="text-[11px] font-semibold tracking-[0.14em] text-muted-foreground uppercase sm:text-xs sm:tracking-[0.16em]">
-                    {item.label}
-                  </p>
-                  <p className="mt-2 text-2xl font-semibold text-foreground">
-                    {item.value}
-                  </p>
-                </div>
-                <div className="rounded-2xl bg-primary/10 px-3 py-2 text-xs font-semibold text-primary sm:text-sm">
-                  {item.value === 1 ? "1 shown" : `${item.value} shown`}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </section>
-
-        <section className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_24rem]">
-          <div className="space-y-6">
-            <Card className="glass-panel animate-entry border-white/75 bg-white/82 [animation-delay:100ms]">
-              <CardHeader className="space-y-2">
-                <CardTitle className="text-xl">Your teams</CardTitle>
-                <CardDescription>
-                  Approved memberships give you access to the matching team
-                  dashboard. Members can view only, while admins and moderators
-                  can also transact.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {groupsData.approvedTeams.length === 0 ? (
-                  <div className="rounded-3xl border border-dashed border-border/80 bg-muted/55 px-5 py-10 text-center">
-                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-                      <Users className="h-5 w-5" />
-                    </div>
-                    <p className="mt-4 text-lg font-medium text-foreground">
-                      No approved teams yet
-                    </p>
-                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                      Request access to an existing team below, or ask an admin
-                      to create a new group for your team.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="grid gap-4 md:grid-cols-2">
-                    {groupsData.approvedTeams.map((team) => (
-                      <Card
-                        key={team.teamId}
-                        className="border-white/70 bg-white/80 shadow-sm"
-                      >
-                        <CardContent className="space-y-4 p-5">
-                          <div className="flex flex-wrap items-start justify-between gap-3">
-                            <div className="min-w-0 flex-1">
-                              <p className="wrap-break-word text-lg font-semibold text-foreground">
-                                {team.name}
-                              </p>
-                              <p className="mt-1 wrap-break-word text-sm leading-6 text-muted-foreground">
-                                {team.description || "No team description yet."}
-                              </p>
-                            </div>
-                            <span
-                              className={
-                                canManageTeamMembership(team.role)
-                                  ? "rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700"
-                                  : "rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700"
-                              }
-                            >
-                              {formatRoleLabel(team.role)}
-                            </span>
-                          </div>
-
-                          <div className="grid grid-cols-1 gap-3 text-sm min-[380px]:grid-cols-2">
-                            <div className="rounded-2xl bg-muted/60 p-3">
-                              <p className="text-[11px] font-semibold tracking-[0.14em] text-muted-foreground uppercase sm:text-xs sm:tracking-[0.18em]">
-                                Members
-                              </p>
-                              <p className="mt-2 font-semibold text-foreground">
-                                {team.memberCount}
-                              </p>
-                            </div>
-                            <div className="rounded-2xl bg-muted/60 p-3">
-                              <p className="text-[11px] font-semibold tracking-[0.14em] text-muted-foreground uppercase sm:text-xs sm:tracking-[0.18em]">
-                                Pending
-                              </p>
-                              <p className="mt-2 font-semibold text-foreground">
-                                {team.pendingRequestCount}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                            <Button asChild className="flex-1">
-                              <Link href={`/dashboard/${team.teamId}`}>
-                                {canManageTeamMembership(team.role)
-                                  ? "Open dashboard"
-                                  : "View dashboard"}
-                              </Link>
-                            </Button>
-                            {canManageGroups ? (
-                              <DeleteTeamButton
-                                teamId={team.teamId}
-                                teamName={team.name}
-                              />
-                            ) : null}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card className="glass-panel animate-entry border-white/75 bg-white/82 [animation-delay:160ms]">
-              <CardHeader className="space-y-2">
-                <CardTitle className="text-xl">Pending requests</CardTitle>
-                <CardDescription>
-                  These are the teams you have asked to join and are waiting for
-                  an admin approval.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {groupsData.pendingTeams.length === 0 ? (
-                  <p className="rounded-2xl border border-dashed border-border/80 bg-muted/45 px-4 py-5 text-sm leading-6 text-muted-foreground">
-                    You do not have any pending join requests right now.
-                  </p>
-                ) : (
-                  <div className="space-y-4">
-                    {groupsData.pendingTeams.map((team) => (
-                      <div
-                        key={team.teamId}
-                        className="rounded-3xl border border-white/70 bg-white/80 p-4 shadow-sm"
-                      >
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                          <div className="min-w-0">
-                            <p className="wrap-break-word font-semibold text-foreground">{team.name}</p>
-                            <p className="mt-1 wrap-break-word text-sm leading-6 text-muted-foreground">
-                              {team.description || "No team description yet."}
-                            </p>
-                          </div>
-                          <span className="w-fit rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-secondary-foreground">
-                            Requested {formatTimestampInBusinessTimeZone(team.requestedAt)}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <CollectionPageNavigation
-                  currentCursor={currentCursors.memberships}
-                  nextCursor={groupsData.nextCursors.memberships}
-                  label="your memberships"
-                  href={groupsPageHref({
-                    ...currentCursors,
-                    memberships:
-                      groupsData.nextCursors.memberships ?? undefined,
-                  })}
-                />
-              </CardContent>
-            </Card>
-
-            <Card className="glass-panel animate-entry border-white/75 bg-white/82 [animation-delay:220ms]">
-              <CardHeader className="space-y-2">
-                <CardTitle className="text-xl">Available teams</CardTitle>
-                <CardDescription>
-                  Browse teams you have not joined yet and send a join request
-                  to the right admin group.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {groupsData.availableTeams.length === 0 ? (
-                  <p className="rounded-2xl border border-dashed border-border/80 bg-muted/45 px-4 py-5 text-sm leading-6 text-muted-foreground">
-                    Every existing team is already connected to your account, or
-                    there are no other teams yet.
-                  </p>
-                ) : (
-                  <div className="grid gap-4 md:grid-cols-2">
-                    {groupsData.availableTeams.map((team) => (
-                      <Card
-                        key={team.teamId}
-                        className="border-white/70 bg-white/80 shadow-sm"
-                      >
-                        <CardContent className="space-y-4 p-5">
-                          <div className="min-w-0">
-                            <p className="wrap-break-word text-lg font-semibold text-foreground">
-                              {team.name}
-                            </p>
-                            <p className="mt-1 wrap-break-word text-sm leading-6 text-muted-foreground">
-                              {team.description || "No team description yet."}
-                            </p>
-                          </div>
-
-                          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                            <RequestAccessButton teamId={team.teamId} />
-                            {canManageGroups ? (
-                              <DeleteTeamButton
-                                teamId={team.teamId}
-                                teamName={team.name}
-                              />
-                            ) : null}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-                <CollectionPageNavigation
-                  currentCursor={currentCursors.availableTeams}
-                  nextCursor={groupsData.nextCursors.availableTeams}
-                  label="available teams"
-                  href={groupsPageHref({
-                    ...currentCursors,
-                    availableTeams:
-                      groupsData.nextCursors.availableTeams ?? undefined,
-                  })}
-                />
-              </CardContent>
-            </Card>
-          </div>
-
-          <aside className="space-y-6 lg:sticky lg:top-6 lg:self-start">
-            {canManageGroups ? (
-              <CreateTeamForm />
-            ) : (
-              <Card className="glass-panel border-white/75 bg-white/82">
-                <CardHeader className="space-y-2">
-                  <CardTitle className="text-xl">Group creation</CardTitle>
-                  <CardDescription className="leading-6">
-                    Only admins can create or delete groups. Moderators can
-                    manage team transactions and approvals, while members can
-                    request access to existing groups and view only approved
-                    dashboards.
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            )}
-
-            <Card className="glass-panel animate-entry border-white/75 bg-white/82 [animation-delay:260ms]">
-              <CardHeader className="space-y-2">
-                <CardTitle className="text-xl">Admin approvals</CardTitle>
-                <CardDescription>
-                  If you admin or moderate a team, incoming join requests appear
-                  here for review and approval.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {groupsData.adminPendingApprovals.length === 0 ? (
-                  <div className="rounded-3xl border border-dashed border-border/80 bg-muted/45 px-4 py-8 text-center">
-                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-                      <Clock3 className="h-5 w-5" />
-                    </div>
-                    <p className="mt-4 font-medium text-foreground">
-                      No requests waiting
-                    </p>
-                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                      New join requests from members will show up here for the
-                      teams you manage.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {groupsData.adminPendingApprovals.map((request) => (
-                      <div
-                        key={request.membershipId}
-                        className="rounded-3xl border border-white/70 bg-white/80 p-4 shadow-sm"
-                      >
-                        <p className="wrap-break-word font-semibold text-foreground">
-                          {request.requesterName || "Unknown member"}
-                        </p>
-                        <p className="mt-1 wrap-break-word text-sm leading-6 text-muted-foreground">
-                          wants to join {request.teamName}
-                        </p>
-                        <p className="mt-2 text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase sm:text-xs sm:tracking-[0.16em]">
-                          Requested {formatTimestampInBusinessTimeZone(request.requestedAt)}
-                        </p>
-                        <div className="mt-4">
-                          <ApproveRequestButton membershipId={request.membershipId} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <CollectionPageNavigation
-                  currentCursor={currentCursors.adminPendingApprovals}
-                  nextCursor={groupsData.nextCursors.adminPendingApprovals}
-                  label="pending approvals"
-                  href={groupsPageHref({
-                    ...currentCursors,
-                    adminPendingApprovals:
-                      groupsData.nextCursors.adminPendingApprovals ?? undefined,
-                  })}
-                />
-              </CardContent>
-            </Card>
-
-            <Card className="glass-panel animate-entry border-white/75 bg-white/82 [animation-delay:320ms]">
-              <CardContent className="space-y-3 p-6">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/12 text-primary">
-                    <Building2 className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-base">How roles work</CardTitle>
-                    <CardDescription className="mt-1 text-sm">
-                      Approved members can view only their approved team
-                      dashboards. Approved team admins and moderators can add or
-                      remove money, and only global admins can create or delete
-                      groups.
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </aside>
-        </section>
+      <div className="flex flex-col justify-between gap-4 border-b border-border pb-4 lg:flex-row lg:items-end">
+        <nav aria-label="Teams views" className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+          {views.map((view) => <Link key={view} href={teamsPageHref(view, location.cursors)} aria-current={data.view === view ? "page" : undefined}
+            className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium ${data.view === view ? "border-primary bg-primary text-white" : "border-border bg-card text-muted-foreground hover:bg-muted"}`}>
+            <span className="whitespace-nowrap">{viewLabels[view]}</span>{view === "approvals" && data.hasIncomingRequests ? <span className={`rounded px-1.5 py-0.5 text-[11px] ${data.view === view ? "bg-white text-primary" : "bg-amber-50 text-warning"}`}><span aria-hidden="true" className="font-bold sm:hidden">!</span><span aria-hidden="true" className="hidden whitespace-nowrap sm:inline">Action needed</span><span className="sr-only"> Action needed</span></span> : null}
+          </Link>)}
+        </nav>
+        {canManage ? <p className="flex items-center gap-2 text-xs text-muted-foreground"><ShieldCheck className="h-4 w-4 shrink-0" aria-hidden="true" />Global Admin: team creation and management available below</p> : null}
       </div>
-    </main>
-  );
+
+      <section aria-labelledby="teams-task-heading" className="rounded-xl border border-border bg-card p-4 sm:p-6">
+        <div className="mb-5 space-y-2">
+          <h2 id="teams-task-heading" className="text-xl font-semibold">{viewLabels[data.view]}</h2>
+          <p className="max-w-3xl text-sm leading-6 text-muted-foreground">{{ teams: "These approved memberships let you open the team's ledger. Your Team role determines whether you can record money or review requests.", discover: "Find the team you need. Only its name and description are shown until your membership is approved.", requests: "Your outgoing requests are awaiting approval. An approved Team Admin or Team Moderator for that team must approve you before you can open its ledger.", approvals: "Review incoming requests for teams where your approved Team role is Admin or Moderator. Your Global role alone does not grant approval rights." }[data.view]}</p>
+        </div>
+
+        {data.view === "teams" ? data.approvedTeams.length ? <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3" aria-label="Your approved teams">
+          {data.approvedTeams.map((team) => <li key={team.teamId} className="min-w-0 rounded-lg border border-border p-4">
+            <div className="flex items-start justify-between gap-3"><h3 className="text-lg font-semibold wrap-anywhere">{team.name}</h3>{team.isOwner ? <StatusBadge>Owner</StatusBadge> : null}</div>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground wrap-anywhere">{team.description || "No team description provided."}</p>
+            <p className="mt-4 text-sm font-medium">Team role: {formatRoleLabel(team.teamRole)}</p>
+            <p className="mt-1 text-xs leading-5 text-muted-foreground">{team.teamRole === "MEMBER" ? "View-only access to balance and history." : "Can record money and approve team requests."}</p>
+            <Button asChild className="mt-4 w-full"><Link href={`/dashboard/${team.teamId}`}>Open team<ChevronRight aria-hidden="true" /></Link></Button>
+            {canManage ? <TeamManagement teamId={team.teamId} teamName={team.name} returnTo={viewHref} /> : null}
+          </li>)}
+        </ul> : <EmptyState title={data.hasApprovedTeams ? "No teams on this page" : "No approved teams yet"} description={data.hasApprovedTeams ? "Your approved memberships are on another page. Return to the first page to choose a team." : "Request access to a team first. Its Team Admin or Team Moderator must approve you before its ledger becomes available."} action={<Button asChild><Link href={data.hasApprovedTeams ? teamsPageHref("teams", { ...location.cursors, teams: undefined }) : teamsPageHref("discover", location.cursors)}>{data.hasApprovedTeams ? "First page" : "Discover teams"}</Link></Button>} /> : null}
+
+        {data.view === "discover" ? data.discoverableTeams.length ? <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3" aria-label="Teams available to request">
+          {data.discoverableTeams.map((team) => <li key={team.teamId} className="min-w-0 rounded-lg border border-border p-4">
+            <Building2 className="mb-3 h-5 w-5 text-primary" aria-hidden="true" /><h3 className="text-lg font-semibold wrap-anywhere">{team.name}</h3>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground wrap-anywhere">{team.description || "No team description provided."}</p>
+            <p className="my-4 text-xs leading-5 text-muted-foreground">Approval is required before ledger access.</p>
+            <RequestAccessButton teamId={team.teamId} requestsHref={teamsPageHref("requests", location.cursors)} />
+            {canManage ? <TeamManagement teamId={team.teamId} teamName={team.name} returnTo={viewHref} /> : null}
+          </li>)}
+        </ul> : <EmptyState title="No available teams on this page" description="Teams you have joined, requested, or had revoked access to are not listed as available. If you need another team, ask a Global Admin about access or creation." action={<Button asChild variant="outline"><Link href={teamsPageHref(data.hasPendingRequests ? "requests" : "teams", location.cursors)}>{data.hasPendingRequests ? "View your requests" : "Your teams"}</Link></Button>} /> : null}
+
+        {data.view === "requests" ? data.pendingRequests.length ? <ul className="divide-y divide-border rounded-lg border border-border" aria-label="Your pending team requests">
+          {data.pendingRequests.map((request) => <li key={request.teamId} className="space-y-2 p-4"><div className="flex flex-wrap items-start justify-between gap-3"><h3 className="font-semibold wrap-anywhere">{request.name}</h3><StatusBadge tone="warning">Awaiting team approval</StatusBadge></div><p className="text-sm leading-6 text-muted-foreground wrap-anywhere">{request.description || "No team description provided."}</p><p className="text-xs leading-5 text-muted-foreground">Requested {formatTimestampInBusinessTimeZone(request.requestedAt)} · A Team Admin or Team Moderator must approve this request.</p></li>)}
+        </ul> : <EmptyState title={data.hasPendingRequests ? "No requests on this page" : "No pending requests"} description={data.hasPendingRequests ? "Your pending requests are on another page. Return to the first page to review them." : "Request access from Discover teams. Approved memberships move to Your teams."} action={<Button asChild><Link href={data.hasPendingRequests ? teamsPageHref("requests", { ...location.cursors, requests: undefined }) : teamsPageHref("discover", location.cursors)}>{data.hasPendingRequests ? "First page" : "Discover teams"}</Link></Button>} /> : null}
+
+        {data.view === "approvals" ? data.incomingRequests.length ? <ul className="divide-y divide-border rounded-lg border border-border" aria-label="Incoming team requests">
+          {data.incomingRequests.map((request) => <li key={request.membershipId} className="flex flex-col justify-between gap-4 p-4 sm:flex-row sm:items-center"><div className="min-w-0"><h3 className="font-semibold wrap-anywhere">{request.requesterName || "Unnamed member"}</h3><p className="mt-1 text-sm leading-6 text-muted-foreground wrap-anywhere">Requests access to <span className="font-medium text-foreground">{request.teamName}</span></p><p className="mt-1 text-xs text-muted-foreground">Requested {formatTimestampInBusinessTimeZone(request.requestedAt)}</p></div><ApproveRequestButton membershipId={request.membershipId} /></li>)}
+        </ul> : <EmptyState title={data.hasIncomingRequests ? "No requests on this page" : "No requests waiting"} description={data.hasIncomingRequests ? "Requests await review on another page. Return to the first page to review them." : "Incoming requests appear here only for teams where you are an approved Team Admin or Team Moderator."} action={data.hasIncomingRequests ? <Button asChild variant="outline"><Link href={teamsPageHref("approvals", { ...location.cursors, approvals: undefined })}>First page</Link></Button> : undefined} /> : null}
+
+        <PageNavigation view={data.view} cursors={location.cursors} nextCursor={data.nextCursor} shown={shown} />
+      </section>
+
+      {canManage ? <details className="rounded-xl border border-border bg-card p-4 sm:p-6"><summary className="flex min-h-11 cursor-pointer list-item items-center gap-2 font-semibold"><Plus className="h-4 w-4" aria-hidden="true" />Create team <span className="ml-1 text-xs font-normal text-muted-foreground">Global Admin</span></summary><div className="mt-4 max-w-xl"><CreateTeamForm /></div></details> : null}
+    </div>
+  </main>;
 }

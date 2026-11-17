@@ -4,6 +4,8 @@ import {
   MoneyAggregateOverflowError,
   MoneyInputError,
   calculateBalanceInCents,
+  formatCurrencyFromMinorUnits,
+  formatSignedCurrency,
   getMoneyInputErrorReason,
   parseMoneyToMinorUnits,
 } from "@/lib/money";
@@ -46,6 +48,41 @@ describe("parseMoneyToMinorUnits", () => {
     expect(getMoneyInputErrorReason("9".repeat(33))).toBe("too-large");
     expect(getMoneyInputErrorReason(`${" ".repeat(32)}1`)).toBe("too-large");
   });
+});
+
+describe("exact currency formatting", () => {
+  it.each([
+    [0, "BDT\u00a00.00"],
+    [1, "BDT\u00a00.01"],
+    [-1, "-BDT\u00a00.01"],
+    [-0, "-BDT\u00a00.00"],
+    [123_456, "BDT\u00a01,234.56"],
+    [-123_456, "-BDT\u00a01,234.56"],
+    [MAX_TRANSACTION_AMOUNT_IN_CENTS, "BDT\u00a021,474,836.47"],
+    [Number.MAX_SAFE_INTEGER, "BDT\u00a090,071,992,547,409.91"],
+    [-Number.MAX_SAFE_INTEGER, "-BDT\u00a090,071,992,547,409.91"],
+    [Number.MAX_SAFE_INTEGER - 1, "BDT\u00a090,071,992,547,409.90"],
+  ])("formats %s cents with its exact fraction and locale", (amount, expected) => {
+    expect(formatCurrencyFromMinorUnits(amount)).toBe(expected);
+  });
+
+  it("preserves transaction direction independently of currency formatting", () => {
+    expect(formatSignedCurrency(Number.MAX_SAFE_INTEGER, "ADD")).toBe(
+      "+BDT\u00a090,071,992,547,409.91",
+    );
+    expect(formatSignedCurrency(Number.MAX_SAFE_INTEGER, "REMOVE")).toBe(
+      "-BDT\u00a090,071,992,547,409.91",
+    );
+  });
+
+  it.each([Number.MAX_SAFE_INTEGER + 1, Number.NaN, Infinity, 1.5])(
+    "does not widen the supported integer-cent range for %s",
+    (amount) => {
+      expect(() => formatCurrencyFromMinorUnits(amount)).toThrow(
+        MoneyAggregateOverflowError,
+      );
+    },
+  );
 });
 
 describe("calculateBalanceInCents", () => {

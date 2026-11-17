@@ -8,6 +8,12 @@ import type {
 } from "next-auth/adapters";
 import { hasPrismaErrorCode } from "@/lib/prisma-errors";
 import { isActiveUserState } from "@/lib/security-policy";
+import {
+  getAbsoluteSessionDeadline,
+  recordSessionDeadline,
+} from "@/lib/auth-session-lifetime";
+
+type PersistedSession = AdapterSession & { createdAt?: Date };
 
 const PROVIDER_TOKEN_FIELDS = [
   "refresh_token",
@@ -55,6 +61,41 @@ export function hardenAuthAdapter(baseAdapter: Adapter): Adapter {
   const updateSession = baseAdapter.updateSession;
   const deleteSession = baseAdapter.deleteSession;
 
+  async function removeInvalidSession(hashedToken: string) {
+    try {
+      await deleteSession?.(hashedToken);
+    } catch (error) {
+      if (!hasPrismaErrorCode(error, "P2025")) {
+        throw error;
+      }
+    }
+  }
+
+  async function readValidSession(hashedToken: string) {
+    const result = await getSessionAndUser?.(hashedToken);
+    if (!result) {
+      return null;
+    }
+
+    const deadline = getAbsoluteSessionDeadline(result.session as PersistedSession);
+    if (
+      !deadline ||
+      Date.now() >= deadline.getTime() ||
+      Date.now() >= result.session.expires.getTime() ||
+      !isActiveUserState(result.user as typeof result.user & {
+        status?: string | null;
+        disabledAt?: Date | null;
+        deletedAt?: Date | null;
+      })
+    ) {
+      await removeInvalidSession(hashedToken);
+      return null;
+    }
+
+    recordSessionDeadline(deadline);
+    return { ...result, deadline };
+  }
+
   return {
     ...baseAdapter,
     ...(linkAccount
@@ -73,10 +114,16 @@ export function hardenAuthAdapter(baseAdapter: Adapter): Adapter {
     ...(createSession
       ? {
           async createSession(session: AdapterSession) {
+            const createdAt = new Date();
+            const deadline = getAbsoluteSessionDeadline({ createdAt })!;
             const persisted = await createSession({
               ...session,
+              createdAt,
+              expires: new Date(Math.min(session.expires.getTime(), deadline.getTime())),
               sessionToken: hashSessionToken(session.sessionToken),
-            });
+            } as PersistedSession);
+
+            recordSessionDeadline(deadline);
 
             return restoreRawSessionToken(persisted, session.sessionToken);
           },
@@ -86,32 +133,26 @@ export function hardenAuthAdapter(baseAdapter: Adapter): Adapter {
       ? {
           async getSessionAndUser(rawSessionToken: string) {
             const hashedSessionToken = hashSessionToken(rawSessionToken);
-            const result = await getSessionAndUser(hashedSessionToken);
+            const result = await readValidSession(hashedSessionToken);
 
             if (!result) {
               return null;
             }
 
-            if (!isActiveUserState(result.user as typeof result.user & {
-              status?: string | null;
-              disabledAt?: Date | null;
-              deletedAt?: Date | null;
-            })) {
-              try {
-                await deleteSession?.(hashedSessionToken);
-              } catch (error) {
-                if (!hasPrismaErrorCode(error, "P2025")) {
-                  throw error;
-                }
-              }
-
-              return null;
+            const expires = result.deadline;
+            // A still-valid legacy session may have either a shorter rolling
+            // expiry or one beyond the absolute deadline. Normalize it before
+            // Auth.js reads it: core ignores updateSession's return value when
+            // constructing the public session. Expired sessions were already
+            // rejected above, so normalization cannot revive them.
+            if (expires.getTime() !== result.session.expires.getTime()) {
+              await updateSession?.({ sessionToken: hashedSessionToken, expires });
             }
 
             return {
               user: result.user,
               session: restoreRawSessionToken(
-                result.session,
+                { ...result.session, expires },
                 rawSessionToken,
               ),
             };
@@ -124,10 +165,21 @@ export function hardenAuthAdapter(baseAdapter: Adapter): Adapter {
             session: Partial<AdapterSession> & Pick<AdapterSession, "sessionToken">,
           ): Promise<AdapterSession | null | undefined> {
             const rawSessionToken = session.sessionToken;
-            const persisted = await updateSession({
-              ...session,
-              sessionToken: hashSessionToken(rawSessionToken),
-            });
+            const hashedToken = hashSessionToken(rawSessionToken);
+            const current = await readValidSession(hashedToken);
+            if (!current) {
+              return null;
+            }
+
+            const expires = new Date(Math.min(
+              (session.expires ?? current.session.expires).getTime(),
+              current.deadline.getTime(),
+            ));
+            // Never forward creation time or user identity in an update. Those
+            // fields anchor the absolute lifetime and session ownership.
+            const persisted = expires.getTime() === current.session.expires.getTime()
+              ? current.session
+              : await updateSession({ sessionToken: hashedToken, expires });
 
             return persisted
               ? restoreRawSessionToken(persisted, rawSessionToken)

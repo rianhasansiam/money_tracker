@@ -1,0 +1,239 @@
+{
+  "generatedAtUtc": "2026-11-16T19:49:12.905930+00:00",
+  "scope": "Local usability implementation verification. Temporary local logs are fingerprinted below; historical audit/remediation evidence is preserved separately. This does not qualify a production deployment.",
+  "toolchain": {
+    "node": "22.22.2",
+    "npm": "11.11.0",
+    "postgresql": "17.12",
+    "playwright": "1.61.1",
+    "chromiumBuild": "1228",
+    "host": "macOS arm64"
+  },
+  "checks": [
+    {
+      "command": "npm run db:validate",
+      "outcome": "passed",
+      "evidenceLog": {
+        "name": "schema-final.log",
+        "sha256": "166f4c891ceba255451877bdead05f7241aa8439ea1a6d2e3b99ec6e6a3f67de"
+      }
+    },
+    {
+      "command": "npm run lint",
+      "outcome": "passed",
+      "evidenceLog": {
+        "name": "lint-final.log",
+        "sha256": "5736531748afd706187e7b878ef9119b215f0c2e108e8e203c9cbda1974daea7"
+      }
+    },
+    {
+      "command": "npm run typecheck",
+      "outcome": "passed",
+      "evidenceLog": {
+        "name": "typecheck-final.log",
+        "sha256": "ae3d86225d29e57e1868b4a9185b9792acd233d86b975b4d7baa4ff3e6154edc"
+      }
+    },
+    {
+      "command": "npm run test:unit",
+      "outcome": "passed",
+      "testFiles": 40,
+      "tests": 379,
+      "evidenceLog": {
+        "name": "unit-final.log",
+        "sha256": "b374d2a8c1dcb9acf3da8e3d0e1c57c806c75cdf115cdaf7a5c1f5db8f62041c"
+      }
+    },
+    {
+      "command": "npm run test:integration",
+      "outcome": "passed",
+      "testFiles": 7,
+      "tests": 65,
+      "database": "verified disposable PostgreSQL 17.12",
+      "evidenceLog": {
+        "name": "integration-final.log",
+        "sha256": "811cbf5fcc8fed2d5753bccbe05906c6df1d5525f0ec823fa00ab1f1c6994fe9"
+      }
+    },
+    {
+      "command": "npm run test:authorization",
+      "outcome": "passed",
+      "testFiles": 5,
+      "tests": 66,
+      "note": "Includes four action unit files; counts overlap the unit suite.",
+      "evidenceLog": {
+        "name": "authorization-final.log",
+        "sha256": "f21c66a70f116340d817c33957c85209f220159be3189449fc7d9c511e97f3c4"
+      }
+    },
+    {
+      "command": "npm run knip",
+      "outcome": "passed",
+      "evidenceLog": {
+        "name": "knip-final.log",
+        "sha256": "8f9eef6e60a5b6644be51e7140f460d1c8b60015e93200e7f559266b88f4236f"
+      }
+    },
+    {
+      "command": "npm run build (including runtime:prune and runtime:verify)",
+      "outcome": "passed",
+      "bundler": "Turbopack",
+      "standaloneStartup": "passed",
+      "evidenceLog": {
+        "name": "build-final.log",
+        "sha256": "e29566cd45603c2e694982e53b0ecfbf2da32960c12593405659a004fc8d598d"
+      }
+    },
+    {
+      "command": "npm run build:webpack; npm run verify:proxy-manifest; npm run runtime:prune; npm run runtime:verify",
+      "outcome": "passed",
+      "bundler": "Webpack",
+      "protectedProxyRouteFamilies": 3,
+      "standaloneStartup": "passed",
+      "evidenceLog": {
+        "name": "webpack-final.log",
+        "sha256": "2ee6942cbe8c0d6f39b531759d11ee539dd658d48b0afd9d3644d01e38723cc7"
+      }
+    },
+    {
+      "command": "npm run test:e2e",
+      "outcome": "passed",
+      "topology": "canonical",
+      "bundler": "Turbopack",
+      "serverE2ETestFiles": 3,
+      "serverE2ETests": 14,
+      "browserSpecFiles": 7,
+      "browserTests": 33,
+      "runtime": "actual pruned standalone",
+      "identities": "synthetic; external Google provider destination intercepted",
+      "evidenceLog": {
+        "name": "e2e-canonical-default.log",
+        "sha256": "5c583a5a6dbbc3143734aa8e7d10d2aaebb5f7e8a5c476402460ccfbb15c4794"
+      }
+    },
+    {
+      "command": "npm run test:e2e",
+      "outcome": "passed",
+      "topology": "canonical",
+      "bundler": "Webpack",
+      "serverE2ETestFiles": 3,
+      "serverE2ETests": 14,
+      "browserSpecFiles": 7,
+      "browserTests": 33,
+      "runtime": "actual pruned standalone",
+      "identities": "synthetic; external Google provider destination intercepted",
+      "evidenceLog": {
+        "name": "e2e-canonical-final.log",
+        "sha256": "f4a5b79088f2d1b9db41337e5d07def98a0aae2665bc959da8f77d8f0c931144"
+      }
+    },
+    {
+      "command": "npm run test:e2e",
+      "outcome": "passed",
+      "topology": "managed-host",
+      "bundler": "Webpack",
+      "serverE2ETestFiles": 3,
+      "serverE2ETests": 14,
+      "browserSpecFiles": 7,
+      "browserTests": 33,
+      "runtime": "actual pruned standalone",
+      "identities": "synthetic; external Google provider destination intercepted",
+      "evidenceLog": {
+        "name": "e2e-managed-final.log",
+        "sha256": "42e44bb31d4aad409e158b4a478efc7fd065b6a299ad687486d9434ecde6039d"
+      }
+    },
+    {
+      "command": "npm audit --json",
+      "outcome": "passed",
+      "vulnerabilities": 0,
+      "dependencyMetadata": {
+        "prod": 242,
+        "dev": 508,
+        "optional": 188,
+        "peer": 0,
+        "peerOptional": 0,
+        "total": 789
+      },
+      "evidenceLog": {
+        "name": "audit-full.json",
+        "sha256": "58bd5ef61b9c80ebb5beb67bebb20c8d2e56ab15b0e594059b89b4710d38ca75"
+      }
+    },
+    {
+      "command": "npm audit --omit=dev --json",
+      "outcome": "passed",
+      "vulnerabilities": 0,
+      "dependencyMetadata": {
+        "prod": 242,
+        "dev": 508,
+        "optional": 188,
+        "peer": 0,
+        "peerOptional": 0,
+        "total": 789
+      },
+      "evidenceLog": {
+        "name": "audit-production.json",
+        "sha256": "58bd5ef61b9c80ebb5beb67bebb20c8d2e56ab15b0e594059b89b4710d38ca75"
+      }
+    }
+  ],
+  "responsive": {
+    "evidence": "screenshots/after/responsive-matrix.json",
+    "sha256": "ba7113b8405760005840017636c411dbbcbceaa646824b33ea55195bd7b2aaeb",
+    "cases": 103,
+    "allPassed": true,
+    "widths": [
+      320,
+      390,
+      768,
+      1024,
+      1440
+    ],
+    "nativeBrowserZoom": 2,
+    "minimumSampledContrastRatio": 4.842409024801452,
+    "minimumMeasuredPrimaryControlHeightCSSPixels": 44,
+    "note": "Sampled layout, contrast, focus, control-height and Chromium native-zoom checks do not establish formal accessibility certification or physical mobile keyboard behavior."
+  },
+  "screenshots": {
+    "count": 35,
+    "data": "synthetic",
+    "comparisonViewportHeight": 900
+  },
+  "configuration": {
+    "newProductionVariables": [],
+    "dependencyChanges": false,
+    "schemaChanges": false,
+    "migrationChanges": false,
+    "privateEnvironmentFiles": "preserved; no values included"
+  },
+  "unexecutedChecks": [
+    {
+      "check": "Hosted Linux CI and branch protection",
+      "blocker": "Only local runner available",
+      "nextStep": "Run repository workflow with PostgreSQL 17 and require quality gate before merge/release."
+    },
+    {
+      "check": "Real Google callback and deployed ingress",
+      "blocker": "Synthetic identities/provider destination interception in local tests",
+      "nextStep": "Verify invitation admission, OAuth callback, sign-out, forwarding/TLS and safe return with isolated staging OAuth application."
+    },
+    {
+      "check": "Physical mobile keyboard, assistive technology and additional browsers",
+      "blocker": "Local Chromium automation cannot reproduce every OS keyboard/screen reader",
+      "nextStep": "Test supported mobile Safari/Chrome and assistive technology on actual devices."
+    },
+    {
+      "check": "Production-sized note search",
+      "blocker": "Only bounded synthetic fixture query plans measured",
+      "nextStep": "Measure staging cardinalities/selectivity and concurrency before setting performance expectations."
+    },
+    {
+      "check": "Deployment controls and recovery",
+      "blocker": "Requires deployment environment/operator access",
+      "nextStep": "Verify runtime grants, managed secrets, backups/restore, ingress, alerts and logs."
+    }
+  ],
+  "productionReleaseQualified": false,
+  "deployed": false
+}

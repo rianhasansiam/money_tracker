@@ -1,3 +1,6 @@
+"use client";
+
+import { useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { beginGoogleSignIn } from "@/actions/authentication";
 
@@ -15,12 +18,16 @@ export function GoogleSignInButton({
       action={beginGoogleSignIn.bind(null, redirectTo)}
       className={className}
     >
-      <Button type="submit" size="lg" className="w-full justify-center">
-        <GoogleMark />
-        Continue with Google
-      </Button>
+      <GoogleSubmitButton />
     </form>
   );
+}
+
+function GoogleSubmitButton() {
+  const { pending } = useFormStatus();
+  return <Button type="submit" size="lg" className="w-full justify-center" disabled={pending}>
+    <GoogleMark />{pending ? "Opening Google..." : "Continue with Google"}
+  </Button>;
 }
 
 function GoogleMark() {

@@ -1,154 +1,68 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { ArchiveX, X } from "lucide-react";
+import { useRef, useState, useTransition, type FormEvent } from "react";
+import { ArchiveX } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { quarantineTeamAction } from "@/actions/groups";
+import { ReauthenticateButton } from "@/components/auth/reauthenticate-button";
 import { Button } from "@/components/ui/button";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { Feedback } from "@/components/ui/feedback";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-interface DeleteTeamButtonProps {
-  teamId: string;
-  teamName: string;
-}
-
-export function DeleteTeamButton({
-  teamId,
-  teamName,
-}: DeleteTeamButtonProps) {
+export function DeleteTeamButton({ teamId, teamName, returnTo = "/groups" }: { teamId: string; teamName: string; returnTo?: string }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isOpen, setIsOpen] = useState(false);
   const [confirmation, setConfirmation] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const submitting = useRef(false);
+  const [needsSignIn, setNeedsSignIn] = useState(false);
 
   function closeDialog() {
-    if (isPending) {
-      return;
-    }
-
-    setIsOpen(false);
-    setConfirmation("");
+    if (submitting.current) return;
+    setIsOpen(false); setConfirmation(""); setError(null); setNeedsSignIn(false);
   }
 
-  return (
-    <>
-      <Button
-        type="button"
-        variant="outline"
-        className="w-full border-destructive/25 text-destructive hover:bg-destructive/5 hover:text-destructive sm:w-auto"
-        onClick={() => setIsOpen(true)}
-      >
-        <ArchiveX className="h-4 w-4" />
-        Quarantine group
-      </Button>
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (submitting.current || confirmation !== teamName) return;
+    submitting.current = true; setError(null);
+    startTransition(async () => {
+      try {
+        const result = await quarantineTeamAction(teamId, confirmation);
+        if (result.status === "error") { setError(result.message); setNeedsSignIn(result.code === "RECENT_AUTHENTICATION_REQUIRED"); return; }
+        toast.success(result.message);
+        setIsOpen(false); setConfirmation(""); router.refresh();
+      } catch {
+        setError("We could not confirm whether the team changed. Refresh the page before trying again.");
+      } finally { submitting.current = false; }
+    });
+  }
 
-      {isOpen ? (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-4"
-          role="presentation"
-          onKeyDown={(event) => {
-            if (event.key === "Escape") {
-              closeDialog();
-            }
-          }}
-        >
-          <section
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={`quarantine-title-${teamId}`}
-            aria-describedby={`quarantine-description-${teamId}`}
-            className="w-full max-w-lg rounded-3xl border border-white/70 bg-white p-5 shadow-2xl sm:p-6"
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h2
-                  id={`quarantine-title-${teamId}`}
-                  className="text-xl font-semibold text-foreground"
-                >
-                  Quarantine {teamName}?
-                </h2>
-                <p
-                  id={`quarantine-description-${teamId}`}
-                  className="mt-2 text-sm leading-6 text-muted-foreground"
-                >
-                  Normal access will stop immediately. Memberships and the full
-                  financial ledger remain preserved for 30 days and an admin can
-                  restore the team during that window.
-                </p>
-              </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                aria-label="Close quarantine confirmation"
-                onClick={closeDialog}
-                disabled={isPending}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-
-            <div className="mt-5 space-y-2">
-              <Label htmlFor={`confirm-team-${teamId}`}>
-                Type <span className="font-semibold">{teamName}</span> exactly
-              </Label>
-              <Input
-                id={`confirm-team-${teamId}`}
-                value={confirmation}
-                onChange={(event) => setConfirmation(event.target.value)}
-                autoComplete="off"
-                autoFocus
-                disabled={isPending}
-              />
-            </div>
-
-            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={closeDialog}
-                disabled={isPending}
-              >
-                Keep group
-              </Button>
-              <Button
-                type="button"
-                className="bg-destructive text-white hover:bg-destructive/90"
-                disabled={isPending || confirmation !== teamName}
-                onClick={() => {
-                  startTransition(async () => {
-                    try {
-                      const result = await quarantineTeamAction(
-                        teamId,
-                        confirmation,
-                      );
-
-                      if (result.status === "error") {
-                        toast.error(result.message);
-                        return;
-                      }
-
-                      toast.success(result.message);
-                      setIsOpen(false);
-                      setConfirmation("");
-                      router.refresh();
-                    } catch {
-                      toast.error(
-                        "We could not confirm whether this group changed. Refresh the page before taking another action.",
-                      );
-                    }
-                  });
-                }}
-              >
-                <ArchiveX className="h-4 w-4" />
-                {isPending ? "Quarantining..." : "Quarantine for 30 days"}
-              </Button>
-            </div>
-          </section>
+  return <>
+    <Button type="button" variant="outline" className="w-full border-destructive/30 text-destructive hover:bg-red-50 sm:w-auto" onClick={() => setIsOpen(true)}>
+      <ArchiveX aria-hidden="true" /> Quarantine team
+    </Button>
+    <ConfirmationDialog open={isOpen} busy={isPending} onClose={closeDialog} title={`Quarantine ${teamName}?`}
+      description="Normal access will stop. The ledger and memberships are preserved, and administrators can restore the team during the 30-day recovery period. This action does not permanently delete the team.">
+      <form onSubmit={submit} className="mt-5 space-y-5" aria-busy={isPending}>
+        <div className="space-y-2">
+          <Label htmlFor={`confirm-team-${teamId}`}>Type <span className="font-semibold">{teamName}</span> exactly</Label>
+          <Input id={`confirm-team-${teamId}`} value={confirmation} onChange={(event) => setConfirmation(event.target.value)} autoComplete="off" autoFocus disabled={isPending} />
         </div>
-      ) : null}
-    </>
-  );
+        {error ? <Feedback tone="error">{error}</Feedback> : null}
+        <p className="text-sm leading-6 text-muted-foreground">The recovery period starts after confirmation. Permanent removal requires a separate administrator operation after retention.</p>
+        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          <Button type="button" variant="outline" onClick={closeDialog} disabled={isPending}>Keep team</Button>
+          <Button type="submit" className="bg-destructive text-white hover:bg-destructive/90" disabled={isPending || confirmation !== teamName}>
+            <ArchiveX aria-hidden="true" />{isPending ? "Quarantining..." : "Quarantine for 30 days"}
+          </Button>
+        </div>
+      </form>
+        {needsSignIn ? <div className="space-y-2"><p className="text-sm leading-6 text-muted-foreground">Sign in again to confirm your identity. A new Google sign-in revokes older application sessions. You will need to enter the team name and confirm this action again; this confirmation is not restored or automatically submitted.</p><ReauthenticateButton returnTo={returnTo} /></div> : null}
+    </ConfirmationDialog>
+  </>;
 }

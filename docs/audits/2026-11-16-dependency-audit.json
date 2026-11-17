@@ -1,0 +1,1754 @@
+{
+  "auditDate": "2026-11-16",
+  "timezone": "Asia/Dhaka",
+  "commit": "cdc7a911f49a72c975bc0f1ae6cc1b3a86dda451",
+  "lockfileSha256": "252694bb8d01ab0538723a1ee0f93908940bc1933baac46534a842e0382e29f0",
+  "note": "Counts represent affected package entries in the npm dependency graph, including transitive meta-vulnerabilities; they are not independent exploitable application findings or a standalone-artifact inventory.",
+  "graphs": {
+    "full": {
+      "command": "npm audit --json",
+      "exitCode": 1,
+      "counts": {
+        "info": 0,
+        "low": 0,
+        "moderate": 14,
+        "high": 15,
+        "critical": 4,
+        "total": 33
+      },
+      "packages": [
+        {
+          "name": "@auth/core",
+          "installedVersions": [
+            "0.41.2"
+          ],
+          "severity": "critical",
+          "isDirect": false,
+          "affectedRange": "<=0.41.2",
+          "via": [
+            {
+              "title": "Auth.js: Email normalizer validates the address before Unicode normalization, allowing a homoglyph @ bypass",
+              "url": "https://github.com/advisories/GHSA-7rqj-j65f-68wh",
+              "severity": "critical",
+              "range": ">=0.1.0 <0.41.3"
+            },
+            {
+              "title": "Auth.js: getToken() throws an uncaught exception on malformed Bearer authorization headers",
+              "url": "https://github.com/advisories/GHSA-xmf8-cvqr-rfgj",
+              "severity": "high",
+              "range": ">=0.1.0 <0.41.3"
+            },
+            {
+              "title": "Auth.js: OAuth state, nonce, and PKCE check cookies are not bound to the provider that created them",
+              "url": "https://github.com/advisories/GHSA-x445-f3h2-j279",
+              "severity": "moderate",
+              "range": "<=0.41.2"
+            }
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "@auth/prisma-adapter",
+          "installedVersions": [
+            "2.11.2"
+          ],
+          "severity": "critical",
+          "isDirect": true,
+          "affectedRange": "<=2.11.2",
+          "via": [
+            "@auth/core"
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "@hono/node-server",
+          "installedVersions": [
+            "1.19.13"
+          ],
+          "severity": "moderate",
+          "isDirect": false,
+          "affectedRange": "<=2.1.2",
+          "via": [
+            {
+              "title": "Node.js Adapter for Hono: Path traversal in `serve-static` on Windows via encoded backslash (`%5C`)",
+              "url": "https://github.com/advisories/GHSA-frvp-7c67-39w9",
+              "severity": "moderate",
+              "range": "<1.19.15"
+            },
+            {
+              "title": "@hono/node-server: `serveStatic` decodes the request path a second time, leading to bypass of middleware on static paths",
+              "url": "https://github.com/advisories/GHSA-rmxm-3fg6-px4f",
+              "severity": "moderate",
+              "range": ">=1.19.10 <2.1.3"
+            },
+            {
+              "title": "@hono/node-server: Backslash in the request path is parsed as a path separator, bypassing path-based access control at a reverse proxy",
+              "url": "https://github.com/advisories/GHSA-jpvv-r467-5p4w",
+              "severity": "moderate",
+              "range": "<1.19.18"
+            }
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "@prisma/config",
+          "installedVersions": [
+            "7.7.0"
+          ],
+          "severity": "high",
+          "isDirect": false,
+          "affectedRange": "6.13.0-dev.1 - 7.10.0 || 8.1.0-dev.1 - 8.1.0-dev.4",
+          "via": [
+            "deepmerge-ts"
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "@prisma/dev",
+          "installedVersions": [
+            "0.24.3"
+          ],
+          "severity": "moderate",
+          "isDirect": false,
+          "affectedRange": "<=0.24.16",
+          "via": [
+            "@hono/node-server",
+            "valibot"
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "@typescript-eslint/eslint-plugin",
+          "installedVersions": [
+            "8.58.2"
+          ],
+          "severity": "moderate",
+          "isDirect": false,
+          "affectedRange": "6.16.0 - 8.72.2",
+          "via": [
+            "@typescript-eslint/type-utils",
+            "@typescript-eslint/utils"
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "@typescript-eslint/parser",
+          "installedVersions": [
+            "8.58.2"
+          ],
+          "severity": "moderate",
+          "isDirect": false,
+          "affectedRange": "6.16.0 - 8.72.2",
+          "via": [
+            "@typescript-eslint/typescript-estree"
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "@typescript-eslint/type-utils",
+          "installedVersions": [
+            "8.58.2"
+          ],
+          "severity": "moderate",
+          "isDirect": false,
+          "affectedRange": "6.16.0 - 8.72.2",
+          "via": [
+            "@typescript-eslint/typescript-estree",
+            "@typescript-eslint/utils"
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "@typescript-eslint/typescript-estree",
+          "installedVersions": [
+            "8.58.2"
+          ],
+          "severity": "moderate",
+          "isDirect": false,
+          "affectedRange": "6.16.0 - 8.72.2",
+          "via": [
+            "minimatch"
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "@typescript-eslint/utils",
+          "installedVersions": [
+            "8.58.2"
+          ],
+          "severity": "moderate",
+          "isDirect": false,
+          "affectedRange": "6.16.0 - 8.72.2",
+          "via": [
+            "@typescript-eslint/typescript-estree"
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "@vitest/mocker",
+          "installedVersions": [
+            "4.1.10"
+          ],
+          "severity": "moderate",
+          "isDirect": false,
+          "affectedRange": "<=4.1.11",
+          "via": [
+            {
+              "title": "Vitest: Path Traversal / Arbitrary File Read via @vitest/mocker Redirect Mock",
+              "url": "https://github.com/advisories/GHSA-82fw-gwwq-j7x9",
+              "severity": "moderate",
+              "range": ">=2.1.0 <4.1.11"
+            },
+            {
+              "title": "Vitest: Code injection via unauthenticated manual mock registration",
+              "url": "https://github.com/advisories/GHSA-qxg6-89mg-rqv8",
+              "severity": "moderate",
+              "range": ">=2.1.0-beta.7 <4.1.12"
+            }
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "baseline-browser-mapping",
+          "installedVersions": [
+            "2.10.43"
+          ],
+          "severity": "moderate",
+          "isDirect": false,
+          "affectedRange": ">=2.0.0 <2.11.0",
+          "via": [
+            {
+              "title": "baseline-browser-mapping process termination on invalid input causes denial of service",
+              "url": "https://github.com/advisories/GHSA-w5vr-8v7q-w6rv",
+              "severity": "moderate",
+              "range": ">=2.0.0 <2.11.0"
+            }
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "brace-expansion",
+          "installedVersions": [
+            "1.1.14",
+            "5.0.7"
+          ],
+          "severity": "high",
+          "isDirect": false,
+          "affectedRange": "<=1.1.20 || 4.0.0 - 5.0.11",
+          "via": [
+            {
+              "title": "brace-expansion: DoS via exponential-time expansion of consecutive non-expanding {} groups",
+              "url": "https://github.com/advisories/GHSA-3jxr-9vmj-r5cp",
+              "severity": "high",
+              "range": "<1.1.16"
+            },
+            {
+              "title": "brace-expansion: DoS via unbounded expansion length causing an out-of-memory process crash",
+              "url": "https://github.com/advisories/GHSA-mh99-v99m-4gvg",
+              "severity": "high",
+              "range": "<1.1.17"
+            },
+            {
+              "title": "brace-expansion: DoS via unbounded expansion length causing an out-of-memory process crash",
+              "url": "https://github.com/advisories/GHSA-mh99-v99m-4gvg",
+              "severity": "high",
+              "range": ">=4.0.0 <5.0.8"
+            },
+            {
+              "title": "brace-expansion: DoS via unbounded intermediate arrays, bypassing the CVE-2026-14257 mitigation",
+              "url": "https://github.com/advisories/GHSA-rgw5-rvv9-x895",
+              "severity": "high",
+              "range": ">=4.0.0 <5.0.9"
+            },
+            {
+              "title": "brace-expansion: DoS via unbounded intermediate arrays, bypassing the CVE-2026-14257 mitigation",
+              "url": "https://github.com/advisories/GHSA-rgw5-rvv9-x895",
+              "severity": "high",
+              "range": "<1.1.18"
+            },
+            {
+              "title": "brace-expansion: Quadratic-time expansion of the `{a},b}` rewrite causes CPU denial of service",
+              "url": "https://github.com/advisories/GHSA-q2hr-2g5m-vwhr",
+              "severity": "moderate",
+              "range": "<1.1.21"
+            },
+            {
+              "title": "brace-expansion: Quadratic-time expansion of the `{a},b}` rewrite causes CPU denial of service",
+              "url": "https://github.com/advisories/GHSA-q2hr-2g5m-vwhr",
+              "severity": "moderate",
+              "range": ">=4.0.0 <5.0.12"
+            },
+            {
+              "title": "brace-expansion: DoS via uncontrolled recursion on nested brace groups causing stack exhaustion",
+              "url": "https://github.com/advisories/GHSA-qhr7-859c-m2p7",
+              "severity": "high",
+              "range": "<1.1.20"
+            },
+            {
+              "title": "brace-expansion: DoS via uncontrolled recursion on nested brace groups causing stack exhaustion",
+              "url": "https://github.com/advisories/GHSA-qhr7-859c-m2p7",
+              "severity": "high",
+              "range": ">=4.0.0 <5.0.11"
+            },
+            {
+              "title": "brace-expansion: DoS via uncontrolled recursion in parseCommaParts causing stack exhaustion",
+              "url": "https://github.com/advisories/GHSA-6j4f-fj2g-mc7p",
+              "severity": "high",
+              "range": "<1.1.19"
+            },
+            {
+              "title": "brace-expansion: DoS via uncontrolled recursion in parseCommaParts causing stack exhaustion",
+              "url": "https://github.com/advisories/GHSA-6j4f-fj2g-mc7p",
+              "severity": "high",
+              "range": ">=4.0.0 <5.0.10"
+            }
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "browserslist",
+          "installedVersions": [
+            "4.28.6"
+          ],
+          "severity": "high",
+          "isDirect": false,
+          "affectedRange": "<=4.28.6",
+          "via": [
+            {
+              "title": "Browserslist: Unbounded memory growth (no cache eviction) via distinct query results, leading to eventual OOM",
+              "url": "https://github.com/advisories/GHSA-c83g-rgw3-j3cx",
+              "severity": "high",
+              "range": "<=4.28.6"
+            },
+            {
+              "title": "Browserslist: Uncaught crash / prototype write via untrusted browserslist-stats.json custom stats (normalizeStats)",
+              "url": "https://github.com/advisories/GHSA-73wf-gq98-2v4g",
+              "severity": "high",
+              "range": "<=4.28.6"
+            }
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "deepmerge-ts",
+          "installedVersions": [
+            "7.1.5"
+          ],
+          "severity": "high",
+          "isDirect": false,
+          "affectedRange": "<8.0.0",
+          "via": [
+            {
+              "title": "DeepmergeTS has stack exhaustion when merging recursive object graphs",
+              "url": "https://github.com/advisories/GHSA-ggr8-5vv4-36mx",
+              "severity": "high",
+              "range": "<8.0.0"
+            }
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "fast-uri",
+          "installedVersions": [
+            "3.1.2"
+          ],
+          "severity": "high",
+          "isDirect": false,
+          "affectedRange": "3.0.0 - 3.1.8",
+          "via": [
+            {
+              "title": "fast-uri vulnerable to host confusion via literal backslash authority delimiter",
+              "url": "https://github.com/advisories/GHSA-v2hh-gcrm-f6hx",
+              "severity": "high",
+              "range": ">=3.0.0 <=3.1.3"
+            },
+            {
+              "title": "fast-uri vulnerable to host confusion via backslash authority introducer",
+              "url": "https://github.com/advisories/GHSA-7p8r-x3mc-p8w7",
+              "severity": "high",
+              "range": ">=3.0.0 <3.1.5"
+            },
+            {
+              "title": "fast-uri vulnerable to server-side request forgery via malformed IPv6 normalization",
+              "url": "https://github.com/advisories/GHSA-f65p-4m7j-42xc",
+              "severity": "high",
+              "range": ">=3.0.0 <3.1.6"
+            },
+            {
+              "title": "fast-uri vulnerable to server-side request forgery via repeated hostname percent-decoding",
+              "url": "https://github.com/advisories/GHSA-fph4-wmhf-6fwf",
+              "severity": "high",
+              "range": ">=3.1.2 <3.1.6"
+            },
+            {
+              "title": "fast-uri vulnerable to host confusion via percent-encoded scheme normalization",
+              "url": "https://github.com/advisories/GHSA-jqff-g426-hqxp",
+              "severity": "high",
+              "range": ">=3.0.0 <3.1.6"
+            },
+            {
+              "title": "fast-uri vulnerable to host confusion via failed IDN canonicalization",
+              "url": "https://github.com/advisories/GHSA-4c8g-83qw-93j6",
+              "severity": "high",
+              "range": ">=3.0.0 <3.1.3"
+            },
+            {
+              "title": "fast-uri vulnerable to authority injection via an unvalidated port in serialize",
+              "url": "https://github.com/advisories/GHSA-qw65-cvwx-89v3",
+              "severity": "high",
+              "range": ">=3.0.0 <3.1.7"
+            },
+            {
+              "title": "fast-uri vulnerable to inconsistent host case normalization via percent-encoded octets",
+              "url": "https://github.com/advisories/GHSA-hrr3-gc8f-f4qj",
+              "severity": "moderate",
+              "range": ">=3.0.0 <3.1.8"
+            },
+            {
+              "title": "fast-uri vulnerable to URI scheme spoofing via percent-encoded scheme decoding",
+              "url": "https://github.com/advisories/GHSA-w74x-v6f9-j3xg",
+              "severity": "moderate",
+              "range": ">=3.0.0 <3.1.9"
+            },
+            {
+              "title": "fast-uri vulnerable to improper path equivalence in relative reference normalization",
+              "url": "https://github.com/advisories/GHSA-xhq7-xmqj-769h",
+              "severity": "low",
+              "range": ">=3.0.0 <3.1.9"
+            },
+            {
+              "title": "fast-uri vulnerable to scheme injection via an unescaped first-segment colon in suffix references",
+              "url": "https://github.com/advisories/GHSA-333x-w4r6-6crp",
+              "severity": "low",
+              "range": ">=3.0.0 <3.1.9"
+            }
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "hono",
+          "installedVersions": [
+            "4.12.25"
+          ],
+          "severity": "moderate",
+          "isDirect": false,
+          "affectedRange": "<=4.13.15",
+          "via": [
+            {
+              "title": "Hono: API Gateway v1 adapter can drop a distinct repeated request header value during de-duplication",
+              "url": "https://github.com/advisories/GHSA-xgm2-5f3f-mvvc",
+              "severity": "moderate",
+              "range": ">=4.3.3 <4.12.27"
+            },
+            {
+              "title": "hono/jsx does not isolate context per request, leading to cross-request data disclosure",
+              "url": "https://github.com/advisories/GHSA-hvrm-45r6-mjfj",
+              "severity": "moderate",
+              "range": ">=4.11.8 <4.12.27"
+            },
+            {
+              "title": "Hono: Server-Side XSS via JSX Escaping Bypass in cx() Utility",
+              "url": "https://github.com/advisories/GHSA-w62v-xxxg-mg59",
+              "severity": "moderate",
+              "range": ">=4.0.0 <4.12.27"
+            },
+            {
+              "title": "Hono: ReDoS in CORS middleware via Access-Control-Request-Headers",
+              "url": "https://github.com/advisories/GHSA-8j4g-w8fx-2239",
+              "severity": "moderate",
+              "range": "<4.12.34"
+            },
+            {
+              "title": "Hono: `memo()` retains SSR output across requests, leading to cross-user data disclosure",
+              "url": "https://github.com/advisories/GHSA-f23p-vx2j-j53r",
+              "severity": "moderate",
+              "range": ">=3.8.0 <4.12.34"
+            },
+            {
+              "title": "Hono: Proxy Helper does not remove response headers listed in the `Connection` header",
+              "url": "https://github.com/advisories/GHSA-79qm-7rj5-m7r9",
+              "severity": "low",
+              "range": ">=4.7.0 <4.12.34"
+            },
+            {
+              "title": "Hono: Algorithmic Complexity DoS in Language Middleware",
+              "url": "https://github.com/advisories/GHSA-54fx-42gc-7vw4",
+              "severity": "moderate",
+              "range": ">=4.12.0 <4.12.34"
+            },
+            {
+              "title": "Hono: Incomplete fix for CVE-2026-39408: `toSSG()` still writes files outside the output directory",
+              "url": "https://github.com/advisories/GHSA-gqvv-2mrq-wpjv",
+              "severity": "moderate",
+              "range": "<4.13.5"
+            },
+            {
+              "title": "Hono: Unbounded dot-notation nesting in `parseBody()` can cause memory exhaustion",
+              "url": "https://github.com/advisories/GHSA-g6gw-c38x-mqfc",
+              "severity": "moderate",
+              "range": "<4.13.5"
+            },
+            {
+              "title": "Hono: Query parser reads parameters after the URL fragment, causing cache-key and proxy interpretation differentials",
+              "url": "https://github.com/advisories/GHSA-crvj-82cr-hjcx",
+              "severity": "moderate",
+              "range": "<4.13.5"
+            },
+            {
+              "title": "hono/jsx renders plain strings unescaped in boundary components, leading to XSS",
+              "url": "https://github.com/advisories/GHSA-hxh3-vqpv-xpqv",
+              "severity": "moderate",
+              "range": "<4.13.7"
+            },
+            {
+              "title": "Hono: `serveStatic` decodes the request path a second time, leading to bypass of middleware on static paths",
+              "url": "https://github.com/advisories/GHSA-5r4p-p66f-jhc7",
+              "severity": "moderate",
+              "range": ">=4.12.4 <4.13.11"
+            },
+            {
+              "title": "Hono: `mount()` and `app.mount()` can forward a path that bypasses middleware scoped inside the mount prefix",
+              "url": "https://github.com/advisories/GHSA-4m76-xfj5-7975",
+              "severity": "moderate",
+              "range": "<4.13.16"
+            },
+            {
+              "title": "Hono: RegExpRouter skips wildcard middleware for some route sets and for paths with an encoded line terminator",
+              "url": "https://github.com/advisories/GHSA-h7mg-cq63-vhpq",
+              "severity": "moderate",
+              "range": ">=4.1.4 <=4.13.15"
+            },
+            {
+              "title": "Hono: `css` helper does not escape a closing tag split between the template and an interpolated value, allowing HTML injection",
+              "url": "https://github.com/advisories/GHSA-3gg2-335m-rxc6",
+              "severity": "low",
+              "range": ">=3.12.0 <=4.13.15"
+            },
+            {
+              "title": "Hono: `csrf()` does not check requests sent by hyperlink auditing (`text/ping`)",
+              "url": "https://github.com/advisories/GHSA-46wx-v44x-9hh2",
+              "severity": "moderate",
+              "range": "<4.13.16"
+            },
+            {
+              "title": "Hono: `validator('form')` skips validation for `multipart/form-data` requests with extra parameters",
+              "url": "https://github.com/advisories/GHSA-4h7h-rv7c-7m2v",
+              "severity": "moderate",
+              "range": ">=4.5.1 <=4.13.15"
+            }
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "js-yaml",
+          "installedVersions": [
+            "4.3.0"
+          ],
+          "severity": "high",
+          "isDirect": false,
+          "affectedRange": "4.0.0 - 4.3.1",
+          "via": [
+            {
+              "title": "JS-YAML: Quadratic CPU consumption in !!omap resolution (3.x and 4.x) \u2014 CVE-2026-59870 fix not backported",
+              "url": "https://github.com/advisories/GHSA-5p4m-2wfm-xmqj",
+              "severity": "high",
+              "range": ">=4.0.0 <4.3.1"
+            },
+            {
+              "title": "js-yaml: maxTotalMergeKeys does not limit CPU use for empty merge sources",
+              "url": "https://github.com/advisories/GHSA-2883-xcg3-v3hh",
+              "severity": "high",
+              "range": ">=4.0.0 <4.3.2"
+            }
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "minimatch",
+          "installedVersions": [
+            "10.2.5"
+          ],
+          "severity": "moderate",
+          "isDirect": false,
+          "affectedRange": "7.0.0 - 11.0.0",
+          "via": [
+            {
+              "title": "minimatch has potential denial of service via globparts amplification",
+              "url": "https://github.com/advisories/GHSA-g3hv-75wg-m249",
+              "severity": "moderate",
+              "range": ">=7.0.0 <11.0.1"
+            }
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "mysql2",
+          "installedVersions": [
+            "3.15.3"
+          ],
+          "severity": "high",
+          "isDirect": false,
+          "affectedRange": "<=3.23.0",
+          "via": [
+            {
+              "title": "MySQL2: Auth Plugin Downgrade to mysql_clear_password Leaks Plaintext Credentials",
+              "url": "https://github.com/advisories/GHSA-3f6p-5ww8-9rcr",
+              "severity": "high",
+              "range": "<3.22.0"
+            },
+            {
+              "title": "MySQL2: Unbounded zlib inflate in compressed MySQL protocol handler allows decompression-bomb DoS",
+              "url": "https://github.com/advisories/GHSA-rgwj-5xj2-c3m3",
+              "severity": "moderate",
+              "range": "<=3.23.0"
+            }
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "nanoid",
+          "installedVersions": [
+            "3.3.16"
+          ],
+          "severity": "high",
+          "isDirect": false,
+          "affectedRange": "<3.3.18",
+          "via": [
+            {
+              "title": "nanoid: custom generators can loop indefinitely when size is zero",
+              "url": "https://github.com/advisories/GHSA-2v37-7h3g-55p8",
+              "severity": "high",
+              "range": "<3.3.18"
+            }
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "next",
+          "installedVersions": [
+            "16.2.10"
+          ],
+          "severity": "critical",
+          "isDirect": true,
+          "affectedRange": "9.3.4-canary.0 - 16.4.0",
+          "via": [
+            {
+              "title": "Next.js: Middleware / Proxy bypass in App Router applications using Turbopack and single locale",
+              "url": "https://github.com/advisories/GHSA-6gpp-xcg3-4w24",
+              "severity": "high",
+              "range": ">=16.0.0 <16.2.11"
+            },
+            {
+              "title": "Next.js: Denial of Service in App Router using Server Actions",
+              "url": "https://github.com/advisories/GHSA-m99w-x7hq-7vfj",
+              "severity": "high",
+              "range": ">=16.0.0 <16.2.11"
+            },
+            {
+              "title": "Next.js: Server-Side Request Forgery in Server Actions on custom servers",
+              "url": "https://github.com/advisories/GHSA-89xv-2m56-2m9x",
+              "severity": "high",
+              "range": ">=16.0.0 <16.2.11"
+            },
+            {
+              "title": "Next.js: Cache confusion of response bodies for requests with bodies",
+              "url": "https://github.com/advisories/GHSA-68g3-v927-f742",
+              "severity": "moderate",
+              "range": ">=16.0.0 <16.2.11"
+            },
+            {
+              "title": "Next.js: Cache confusion of response bodies for requests with bodies containing invalid UTF-8 byte sequences",
+              "url": "https://github.com/advisories/GHSA-4633-3j49-mh5q",
+              "severity": "moderate",
+              "range": ">=16.0.0 <16.2.11"
+            },
+            {
+              "title": "Next.js: Unbounded Server Action payload in Edge runtime",
+              "url": "https://github.com/advisories/GHSA-4c39-4ccg-62r3",
+              "severity": "moderate",
+              "range": ">=16.0.0 <16.2.11"
+            },
+            {
+              "title": "Next.js: Server-Side Request Forgery in rewrites via attacker-controlled destination hostname",
+              "url": "https://github.com/advisories/GHSA-p9j2-gv94-2wf4",
+              "severity": "high",
+              "range": ">=16.0.0 <16.2.11"
+            },
+            {
+              "title": "Next.js: Denial of Service in the Image Optimization API using SVGs",
+              "url": "https://github.com/advisories/GHSA-q8wf-6r8g-63ch",
+              "severity": "moderate",
+              "range": ">=16.0.0 <16.2.11"
+            },
+            {
+              "title": "Next.js: Unauthenticated disclosure of internal Server Function endpoints",
+              "url": "https://github.com/advisories/GHSA-955p-x3mx-jcvp",
+              "severity": "moderate",
+              "range": ">=16.0.0 <16.2.11"
+            },
+            {
+              "title": "Next.js: Unauthenticated Remote Code Execution on windows-hosted servers",
+              "url": "https://github.com/advisories/GHSA-p293-qw3h-jr36",
+              "severity": "critical",
+              "range": ">=16.0.0 <16.3.3"
+            },
+            {
+              "title": "Next.js: Unauthenticated Remote Code Execution in Image Optimization API when AVIF files are used",
+              "url": "https://github.com/advisories/GHSA-2xp9-vwfh-vxw4",
+              "severity": "critical",
+              "range": ">=16.0.0 <16.3.3"
+            },
+            {
+              "title": "Next.js: Remote Code Execution in next/og ImageResponse",
+              "url": "https://github.com/advisories/GHSA-vcvr-r3jv-pc5j",
+              "severity": "critical",
+              "range": ">=16.2.0 <16.3.6"
+            },
+            {
+              "title": "Next.js has cache poisoning of SSG and ISR pages in self-hosted applications",
+              "url": "https://github.com/advisories/GHSA-4jqv-mc3x-m676",
+              "severity": "moderate",
+              "range": ">=16.0.0 <16.3.8"
+            },
+            {
+              "title": "Next.js has information disclosure in development server's Model Context Protocol endpoint",
+              "url": "https://github.com/advisories/GHSA-39w2-rjm5-chcv",
+              "severity": "low",
+              "range": ">=16.0.0 <16.3.8"
+            },
+            {
+              "title": "Next.js has information disclosure in App Router metadata image routes via dynamicParams bypass",
+              "url": "https://github.com/advisories/GHSA-f87g-xv8r-7p7x",
+              "severity": "moderate",
+              "range": ">=16.0.0 <16.3.8"
+            },
+            {
+              "title": "Next.js has cache poisoning in SSG/ISR rendering that leads to cross-user content substitution and persistent denial of service",
+              "url": "https://github.com/advisories/GHSA-mcj8-r9mp-w47p",
+              "severity": "moderate",
+              "range": ">=16.0.0 <16.3.8"
+            },
+            {
+              "title": "Next.js has Server-Side Request Forgery in Image Optimization",
+              "url": "https://github.com/advisories/GHSA-cjq9-62q9-8jv4",
+              "severity": "high",
+              "range": ">=16.0.0 <16.3.8"
+            },
+            {
+              "title": "Next.js: Unauthenticated Remote Code Execution in Image Optimization API when SVG files are used",
+              "url": "https://github.com/advisories/GHSA-2464-fhr4-w9xw",
+              "severity": "critical",
+              "range": ">=16.0.0 <=16.4.0"
+            },
+            {
+              "title": "Next.js: Denial of Service in App Router using Server Actions",
+              "url": "https://github.com/advisories/GHSA-p3m5-59mp-jv5r",
+              "severity": "high",
+              "range": ">=16.0.0 <=16.4.0"
+            },
+            {
+              "title": "Next.js: Unauthenticated Remote Code Execution in `use cache` functions returning typed arrays",
+              "url": "https://github.com/advisories/GHSA-673q-mjm6-r5xr",
+              "severity": "critical",
+              "range": ">=16.0.0 <=16.4.0"
+            },
+            "postcss",
+            "sharp"
+          ],
+          "fixAvailable": {
+            "name": "next",
+            "version": "16.4.6",
+            "isSemVerMajor": false
+          }
+        },
+        {
+          "name": "next-auth",
+          "installedVersions": [
+            "5.0.0-beta.31"
+          ],
+          "severity": "critical",
+          "isDirect": true,
+          "affectedRange": "<=0.0.0-pr.11562.ed0fce23 || 4.24.8 - 5.0.0-beta.31",
+          "via": [
+            "@auth/core",
+            {
+              "title": "Auth.js: Configuration errors can cause existence-based auth checks to fail open (auth object populated with an error)",
+              "url": "https://github.com/advisories/GHSA-8fpg-xm3f-6cx3",
+              "severity": "critical",
+              "range": ">=5.0.0-beta.0 <=5.0.0-beta.31"
+            },
+            {
+              "title": "Auth.js: Email normalizer validates the address before Unicode normalization, allowing a homoglyph @ bypass",
+              "url": "https://github.com/advisories/GHSA-7rqj-j65f-68wh",
+              "severity": "critical",
+              "range": ">=5.0.0-beta.1 <=5.0.0-beta.31"
+            },
+            {
+              "title": "Auth.js: getToken() throws an uncaught exception on malformed Bearer authorization headers",
+              "url": "https://github.com/advisories/GHSA-xmf8-cvqr-rfgj",
+              "severity": "high",
+              "range": ">=5.0.0-beta.0 <=5.0.0-beta.31"
+            },
+            {
+              "title": "Auth.js: OAuth state, nonce, and PKCE check cookies are not bound to the provider that created them",
+              "url": "https://github.com/advisories/GHSA-x445-f3h2-j279",
+              "severity": "moderate",
+              "range": ">=5.0.0-beta.1 <=5.0.0-beta.31"
+            }
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "postcss",
+          "installedVersions": [
+            "8.5.10",
+            "8.5.19"
+          ],
+          "severity": "high",
+          "isDirect": false,
+          "affectedRange": "<=8.5.22",
+          "via": [
+            {
+              "title": "PostCSS: Arbitrary file read and information disclosure via attacker-controlled sourceMappingURL in CSS comments",
+              "url": "https://github.com/advisories/GHSA-6g55-p6wh-862q",
+              "severity": "high",
+              "range": "<=8.5.11"
+            },
+            {
+              "title": "PostCSS: incomplete fix of GHSA-6g55-p6wh-862q \u2014 attacker-controlled sourceMappingURL reads arbitrary .map files when `from` is unset",
+              "url": "https://github.com/advisories/GHSA-fxqj-rqcc-2cmp",
+              "severity": "moderate",
+              "range": "<=8.5.22"
+            },
+            {
+              "title": "PostCSS: Path Traversal in Previous Source Map Auto-Loading (sourceMappingURL) leads to Arbitrary .map File Disclosure",
+              "url": "https://github.com/advisories/GHSA-r28c-9q8g-f849",
+              "severity": "high",
+              "range": "<=8.5.17"
+            }
+          ],
+          "fixAvailable": {
+            "name": "next",
+            "version": "16.4.6",
+            "isSemVerMajor": false
+          }
+        },
+        {
+          "name": "prisma",
+          "installedVersions": [
+            "7.7.0"
+          ],
+          "severity": "high",
+          "isDirect": true,
+          "affectedRange": "6.13.0-dev.1 - 7.10.0 || 8.0.0-rc.3 - 8.1.0-dev.6",
+          "via": [
+            "@prisma/config",
+            "@prisma/dev",
+            "mysql2"
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "sharp",
+          "installedVersions": [
+            "0.34.5"
+          ],
+          "severity": "high",
+          "isDirect": false,
+          "affectedRange": "<=0.35.5-rc.1",
+          "via": [
+            {
+              "title": "sharp inherited vulnerabilities in libvips: CVE-2026-33327, CVE-2026-33328, CVE-2026-35590, CVE-2026-35591",
+              "url": "https://github.com/advisories/GHSA-f88m-g3jw-g9cj",
+              "severity": "high",
+              "range": "<0.35.0"
+            },
+            {
+              "title": "sharp: Vulnerabilities in libheif: GHSA-g89c-p67h-r497 and GHSA-2jg2-4ch7-h545",
+              "url": "https://github.com/advisories/GHSA-rgj7-g3m4-5g8c",
+              "severity": "high",
+              "range": "<0.35.4"
+            },
+            {
+              "title": "sharp : Vulnerability in librsvg dependency CVE-2026-96889",
+              "url": "https://github.com/advisories/GHSA-wq5f-xc86-pv6w",
+              "severity": "high",
+              "range": "<0.35.5"
+            }
+          ],
+          "fixAvailable": {
+            "name": "next",
+            "version": "16.4.6",
+            "isSemVerMajor": false
+          }
+        },
+        {
+          "name": "smol-toml",
+          "installedVersions": [
+            "1.7.0"
+          ],
+          "severity": "high",
+          "isDirect": false,
+          "affectedRange": "<=1.8.0",
+          "via": [
+            {
+              "title": "smol-toml: Denial of Service via malformed TOML documents",
+              "url": "https://github.com/advisories/GHSA-7w5x-hrqm-74c2",
+              "severity": "high",
+              "range": "<=1.7.0"
+            },
+            {
+              "title": "smol-toml: Quadratic-time parse() from parseKey rescanning to end of document on each key line",
+              "url": "https://github.com/advisories/GHSA-r4xh-jqrq-34v2",
+              "severity": "moderate",
+              "range": "<=1.8.0"
+            }
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "source-map-js",
+          "installedVersions": [
+            "1.2.1"
+          ],
+          "severity": "high",
+          "isDirect": false,
+          "affectedRange": "1.0.0 - 1.2.1",
+          "via": [
+            {
+              "title": "source-map-js allows event-loop denial of service through indexed source-map section offsets",
+              "url": "https://github.com/advisories/GHSA-68fv-2mgg-jv7q",
+              "severity": "high",
+              "range": ">=1.0.0 <1.2.2"
+            }
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "typescript-eslint",
+          "installedVersions": [
+            "8.58.2"
+          ],
+          "severity": "moderate",
+          "isDirect": false,
+          "affectedRange": "<=8.72.2",
+          "via": [
+            "@typescript-eslint/eslint-plugin",
+            "@typescript-eslint/parser",
+            "@typescript-eslint/typescript-estree",
+            "@typescript-eslint/utils"
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "valibot",
+          "installedVersions": [
+            "1.2.0"
+          ],
+          "severity": "moderate",
+          "isDirect": false,
+          "affectedRange": "<=1.4.1",
+          "via": [
+            {
+              "title": "Valibot: record() issue paths can make flatten() throw for inherited Object property names",
+              "url": "https://github.com/advisories/GHSA-5qjj-4xww-7phc",
+              "severity": "moderate",
+              "range": "<=1.4.1"
+            }
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "vite",
+          "installedVersions": [
+            "8.1.4"
+          ],
+          "severity": "high",
+          "isDirect": false,
+          "affectedRange": "8.0.0 - 8.1.5",
+          "via": [
+            {
+              "title": "launch-editor: escapeCmdArgs() omits % escaping on Windows",
+              "url": "https://github.com/advisories/GHSA-698v-4r3x-3vcv",
+              "severity": "moderate",
+              "range": ">=8.0.0 <=8.1.5"
+            },
+            {
+              "title": "launch-editor: Editor CLI flag misinterpretation causing arbitrary command execution for some editors",
+              "url": "https://github.com/advisories/GHSA-r825-w8mm-5pxw",
+              "severity": "moderate",
+              "range": ">=8.0.0 <=8.1.5"
+            },
+            {
+              "title": "launch-editor: `fs.existsSync()` existence check can be bypassed on Windows",
+              "url": "https://github.com/advisories/GHSA-587h-7wmj-h5pm",
+              "severity": "high",
+              "range": ">=8.0.0 <=8.1.5"
+            },
+            {
+              "title": "Vite: Cross origin script execution through Vite custom middleware",
+              "url": "https://github.com/advisories/GHSA-9jrq-w75r-8gcw",
+              "severity": "low",
+              "range": ">=8.0.0 <=8.1.5"
+            },
+            {
+              "title": "Vite: Files outside `server.fs.allow` could be served when project paths match system paths on non-Windows machine",
+              "url": "https://github.com/advisories/GHSA-rq7h-c2jc-7f22",
+              "severity": "moderate",
+              "range": ">=8.0.0 <=8.1.5"
+            }
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "vitest",
+          "installedVersions": [
+            "4.1.10"
+          ],
+          "severity": "moderate",
+          "isDirect": true,
+          "affectedRange": "2.1.0-beta.1 - 4.1.10",
+          "via": [
+            "@vitest/mocker",
+            {
+              "title": "Vitest: Path Traversal / Arbitrary File Read via @vitest/mocker Redirect Mock",
+              "url": "https://github.com/advisories/GHSA-82fw-gwwq-j7x9",
+              "severity": "moderate",
+              "range": ">=2.1.0 <4.1.11"
+            }
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "zod",
+          "installedVersions": [
+            "4.3.6"
+          ],
+          "severity": "high",
+          "isDirect": true,
+          "affectedRange": "<4.6.6",
+          "via": [
+            {
+              "title": "Zod can exhaust memory while validating oversized constrained collections",
+              "url": "https://github.com/advisories/GHSA-mrhx-c7xc-m3w5",
+              "severity": "high",
+              "range": "<4.6.6"
+            }
+          ],
+          "fixAvailable": true
+        }
+      ]
+    },
+    "productionOnly": {
+      "command": "npm audit --omit=dev --json",
+      "exitCode": 1,
+      "counts": {
+        "info": 0,
+        "low": 0,
+        "moderate": 5,
+        "high": 11,
+        "critical": 4,
+        "total": 20
+      },
+      "packages": [
+        {
+          "name": "@auth/core",
+          "installedVersions": [
+            "0.41.2"
+          ],
+          "severity": "critical",
+          "isDirect": false,
+          "affectedRange": "<=0.41.2",
+          "via": [
+            {
+              "title": "Auth.js: Email normalizer validates the address before Unicode normalization, allowing a homoglyph @ bypass",
+              "url": "https://github.com/advisories/GHSA-7rqj-j65f-68wh",
+              "severity": "critical",
+              "range": ">=0.1.0 <0.41.3"
+            },
+            {
+              "title": "Auth.js: getToken() throws an uncaught exception on malformed Bearer authorization headers",
+              "url": "https://github.com/advisories/GHSA-xmf8-cvqr-rfgj",
+              "severity": "high",
+              "range": ">=0.1.0 <0.41.3"
+            },
+            {
+              "title": "Auth.js: OAuth state, nonce, and PKCE check cookies are not bound to the provider that created them",
+              "url": "https://github.com/advisories/GHSA-x445-f3h2-j279",
+              "severity": "moderate",
+              "range": "<=0.41.2"
+            }
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "@auth/prisma-adapter",
+          "installedVersions": [
+            "2.11.2"
+          ],
+          "severity": "critical",
+          "isDirect": true,
+          "affectedRange": "<=2.11.2",
+          "via": [
+            "@auth/core"
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "@hono/node-server",
+          "installedVersions": [
+            "1.19.13"
+          ],
+          "severity": "moderate",
+          "isDirect": false,
+          "affectedRange": "<=2.1.2",
+          "via": [
+            {
+              "title": "Node.js Adapter for Hono: Path traversal in `serve-static` on Windows via encoded backslash (`%5C`)",
+              "url": "https://github.com/advisories/GHSA-frvp-7c67-39w9",
+              "severity": "moderate",
+              "range": "<1.19.15"
+            },
+            {
+              "title": "@hono/node-server: `serveStatic` decodes the request path a second time, leading to bypass of middleware on static paths",
+              "url": "https://github.com/advisories/GHSA-rmxm-3fg6-px4f",
+              "severity": "moderate",
+              "range": ">=1.19.10 <2.1.3"
+            },
+            {
+              "title": "@hono/node-server: Backslash in the request path is parsed as a path separator, bypassing path-based access control at a reverse proxy",
+              "url": "https://github.com/advisories/GHSA-jpvv-r467-5p4w",
+              "severity": "moderate",
+              "range": "<1.19.18"
+            },
+            "hono"
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "@prisma/config",
+          "installedVersions": [
+            "7.7.0"
+          ],
+          "severity": "high",
+          "isDirect": false,
+          "affectedRange": "6.13.0-dev.1 - 7.10.0 || 8.1.0-dev.1 - 8.1.0-dev.4",
+          "via": [
+            "deepmerge-ts"
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "@prisma/dev",
+          "installedVersions": [
+            "0.24.3"
+          ],
+          "severity": "moderate",
+          "isDirect": false,
+          "affectedRange": "<=0.24.16",
+          "via": [
+            "@hono/node-server",
+            "hono",
+            "valibot"
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "ajv",
+          "installedVersions": [
+            "8.18.0"
+          ],
+          "severity": "high",
+          "isDirect": false,
+          "affectedRange": "",
+          "via": [
+            "fast-uri"
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "baseline-browser-mapping",
+          "installedVersions": [
+            "2.10.43"
+          ],
+          "severity": "moderate",
+          "isDirect": false,
+          "affectedRange": ">=2.0.0 <2.11.0",
+          "via": [
+            {
+              "title": "baseline-browser-mapping process termination on invalid input causes denial of service",
+              "url": "https://github.com/advisories/GHSA-w5vr-8v7q-w6rv",
+              "severity": "moderate",
+              "range": ">=2.0.0 <2.11.0"
+            }
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "deepmerge-ts",
+          "installedVersions": [
+            "7.1.5"
+          ],
+          "severity": "high",
+          "isDirect": false,
+          "affectedRange": "<8.0.0",
+          "via": [
+            {
+              "title": "DeepmergeTS has stack exhaustion when merging recursive object graphs",
+              "url": "https://github.com/advisories/GHSA-ggr8-5vv4-36mx",
+              "severity": "high",
+              "range": "<8.0.0"
+            }
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "fast-uri",
+          "installedVersions": [
+            "3.1.2"
+          ],
+          "severity": "high",
+          "isDirect": false,
+          "affectedRange": "3.0.0 - 3.1.8",
+          "via": [
+            {
+              "title": "fast-uri vulnerable to host confusion via literal backslash authority delimiter",
+              "url": "https://github.com/advisories/GHSA-v2hh-gcrm-f6hx",
+              "severity": "high",
+              "range": ">=3.0.0 <=3.1.3"
+            },
+            {
+              "title": "fast-uri vulnerable to host confusion via backslash authority introducer",
+              "url": "https://github.com/advisories/GHSA-7p8r-x3mc-p8w7",
+              "severity": "high",
+              "range": ">=3.0.0 <3.1.5"
+            },
+            {
+              "title": "fast-uri vulnerable to server-side request forgery via malformed IPv6 normalization",
+              "url": "https://github.com/advisories/GHSA-f65p-4m7j-42xc",
+              "severity": "high",
+              "range": ">=3.0.0 <3.1.6"
+            },
+            {
+              "title": "fast-uri vulnerable to server-side request forgery via repeated hostname percent-decoding",
+              "url": "https://github.com/advisories/GHSA-fph4-wmhf-6fwf",
+              "severity": "high",
+              "range": ">=3.1.2 <3.1.6"
+            },
+            {
+              "title": "fast-uri vulnerable to host confusion via percent-encoded scheme normalization",
+              "url": "https://github.com/advisories/GHSA-jqff-g426-hqxp",
+              "severity": "high",
+              "range": ">=3.0.0 <3.1.6"
+            },
+            {
+              "title": "fast-uri vulnerable to host confusion via failed IDN canonicalization",
+              "url": "https://github.com/advisories/GHSA-4c8g-83qw-93j6",
+              "severity": "high",
+              "range": ">=3.0.0 <3.1.3"
+            },
+            {
+              "title": "fast-uri vulnerable to authority injection via an unvalidated port in serialize",
+              "url": "https://github.com/advisories/GHSA-qw65-cvwx-89v3",
+              "severity": "high",
+              "range": ">=3.0.0 <3.1.7"
+            },
+            {
+              "title": "fast-uri vulnerable to inconsistent host case normalization via percent-encoded octets",
+              "url": "https://github.com/advisories/GHSA-hrr3-gc8f-f4qj",
+              "severity": "moderate",
+              "range": ">=3.0.0 <3.1.8"
+            },
+            {
+              "title": "fast-uri vulnerable to URI scheme spoofing via percent-encoded scheme decoding",
+              "url": "https://github.com/advisories/GHSA-w74x-v6f9-j3xg",
+              "severity": "moderate",
+              "range": ">=3.0.0 <3.1.9"
+            },
+            {
+              "title": "fast-uri vulnerable to improper path equivalence in relative reference normalization",
+              "url": "https://github.com/advisories/GHSA-xhq7-xmqj-769h",
+              "severity": "low",
+              "range": ">=3.0.0 <3.1.9"
+            },
+            {
+              "title": "fast-uri vulnerable to scheme injection via an unescaped first-segment colon in suffix references",
+              "url": "https://github.com/advisories/GHSA-333x-w4r6-6crp",
+              "severity": "low",
+              "range": ">=3.0.0 <3.1.9"
+            }
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "hono",
+          "installedVersions": [
+            "4.12.25"
+          ],
+          "severity": "moderate",
+          "isDirect": false,
+          "affectedRange": "<=4.13.15",
+          "via": [
+            {
+              "title": "Hono: API Gateway v1 adapter can drop a distinct repeated request header value during de-duplication",
+              "url": "https://github.com/advisories/GHSA-xgm2-5f3f-mvvc",
+              "severity": "moderate",
+              "range": ">=4.3.3 <4.12.27"
+            },
+            {
+              "title": "hono/jsx does not isolate context per request, leading to cross-request data disclosure",
+              "url": "https://github.com/advisories/GHSA-hvrm-45r6-mjfj",
+              "severity": "moderate",
+              "range": ">=4.11.8 <4.12.27"
+            },
+            {
+              "title": "Hono: Server-Side XSS via JSX Escaping Bypass in cx() Utility",
+              "url": "https://github.com/advisories/GHSA-w62v-xxxg-mg59",
+              "severity": "moderate",
+              "range": ">=4.0.0 <4.12.27"
+            },
+            {
+              "title": "Hono: ReDoS in CORS middleware via Access-Control-Request-Headers",
+              "url": "https://github.com/advisories/GHSA-8j4g-w8fx-2239",
+              "severity": "moderate",
+              "range": "<4.12.34"
+            },
+            {
+              "title": "Hono: `memo()` retains SSR output across requests, leading to cross-user data disclosure",
+              "url": "https://github.com/advisories/GHSA-f23p-vx2j-j53r",
+              "severity": "moderate",
+              "range": ">=3.8.0 <4.12.34"
+            },
+            {
+              "title": "Hono: Proxy Helper does not remove response headers listed in the `Connection` header",
+              "url": "https://github.com/advisories/GHSA-79qm-7rj5-m7r9",
+              "severity": "low",
+              "range": ">=4.7.0 <4.12.34"
+            },
+            {
+              "title": "Hono: Algorithmic Complexity DoS in Language Middleware",
+              "url": "https://github.com/advisories/GHSA-54fx-42gc-7vw4",
+              "severity": "moderate",
+              "range": ">=4.12.0 <4.12.34"
+            },
+            {
+              "title": "Hono: Incomplete fix for CVE-2026-39408: `toSSG()` still writes files outside the output directory",
+              "url": "https://github.com/advisories/GHSA-gqvv-2mrq-wpjv",
+              "severity": "moderate",
+              "range": "<4.13.5"
+            },
+            {
+              "title": "Hono: Unbounded dot-notation nesting in `parseBody()` can cause memory exhaustion",
+              "url": "https://github.com/advisories/GHSA-g6gw-c38x-mqfc",
+              "severity": "moderate",
+              "range": "<4.13.5"
+            },
+            {
+              "title": "Hono: Query parser reads parameters after the URL fragment, causing cache-key and proxy interpretation differentials",
+              "url": "https://github.com/advisories/GHSA-crvj-82cr-hjcx",
+              "severity": "moderate",
+              "range": "<4.13.5"
+            },
+            {
+              "title": "hono/jsx renders plain strings unescaped in boundary components, leading to XSS",
+              "url": "https://github.com/advisories/GHSA-hxh3-vqpv-xpqv",
+              "severity": "moderate",
+              "range": "<4.13.7"
+            },
+            {
+              "title": "Hono: `serveStatic` decodes the request path a second time, leading to bypass of middleware on static paths",
+              "url": "https://github.com/advisories/GHSA-5r4p-p66f-jhc7",
+              "severity": "moderate",
+              "range": ">=4.12.4 <4.13.11"
+            },
+            {
+              "title": "Hono: `mount()` and `app.mount()` can forward a path that bypasses middleware scoped inside the mount prefix",
+              "url": "https://github.com/advisories/GHSA-4m76-xfj5-7975",
+              "severity": "moderate",
+              "range": "<4.13.16"
+            },
+            {
+              "title": "Hono: RegExpRouter skips wildcard middleware for some route sets and for paths with an encoded line terminator",
+              "url": "https://github.com/advisories/GHSA-h7mg-cq63-vhpq",
+              "severity": "moderate",
+              "range": ">=4.1.4 <=4.13.15"
+            },
+            {
+              "title": "Hono: `css` helper does not escape a closing tag split between the template and an interpolated value, allowing HTML injection",
+              "url": "https://github.com/advisories/GHSA-3gg2-335m-rxc6",
+              "severity": "low",
+              "range": ">=3.12.0 <=4.13.15"
+            },
+            {
+              "title": "Hono: `csrf()` does not check requests sent by hyperlink auditing (`text/ping`)",
+              "url": "https://github.com/advisories/GHSA-46wx-v44x-9hh2",
+              "severity": "moderate",
+              "range": "<4.13.16"
+            },
+            {
+              "title": "Hono: `validator('form')` skips validation for `multipart/form-data` requests with extra parameters",
+              "url": "https://github.com/advisories/GHSA-4h7h-rv7c-7m2v",
+              "severity": "moderate",
+              "range": ">=4.5.1 <=4.13.15"
+            }
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "mysql2",
+          "installedVersions": [
+            "3.15.3"
+          ],
+          "severity": "high",
+          "isDirect": false,
+          "affectedRange": "<=3.23.0",
+          "via": [
+            {
+              "title": "MySQL2: Auth Plugin Downgrade to mysql_clear_password Leaks Plaintext Credentials",
+              "url": "https://github.com/advisories/GHSA-3f6p-5ww8-9rcr",
+              "severity": "high",
+              "range": "<3.22.0"
+            },
+            {
+              "title": "MySQL2: Unbounded zlib inflate in compressed MySQL protocol handler allows decompression-bomb DoS",
+              "url": "https://github.com/advisories/GHSA-rgwj-5xj2-c3m3",
+              "severity": "moderate",
+              "range": "<=3.23.0"
+            }
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "nanoid",
+          "installedVersions": [
+            "3.3.16"
+          ],
+          "severity": "high",
+          "isDirect": false,
+          "affectedRange": "<3.3.18",
+          "via": [
+            {
+              "title": "nanoid: custom generators can loop indefinitely when size is zero",
+              "url": "https://github.com/advisories/GHSA-2v37-7h3g-55p8",
+              "severity": "high",
+              "range": "<3.3.18"
+            }
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "next",
+          "installedVersions": [
+            "16.2.10"
+          ],
+          "severity": "critical",
+          "isDirect": true,
+          "affectedRange": "9.3.4-canary.0 - 16.4.0",
+          "via": [
+            {
+              "title": "Next.js: Middleware / Proxy bypass in App Router applications using Turbopack and single locale",
+              "url": "https://github.com/advisories/GHSA-6gpp-xcg3-4w24",
+              "severity": "high",
+              "range": ">=16.0.0 <16.2.11"
+            },
+            {
+              "title": "Next.js: Denial of Service in App Router using Server Actions",
+              "url": "https://github.com/advisories/GHSA-m99w-x7hq-7vfj",
+              "severity": "high",
+              "range": ">=16.0.0 <16.2.11"
+            },
+            {
+              "title": "Next.js: Server-Side Request Forgery in Server Actions on custom servers",
+              "url": "https://github.com/advisories/GHSA-89xv-2m56-2m9x",
+              "severity": "high",
+              "range": ">=16.0.0 <16.2.11"
+            },
+            {
+              "title": "Next.js: Cache confusion of response bodies for requests with bodies",
+              "url": "https://github.com/advisories/GHSA-68g3-v927-f742",
+              "severity": "moderate",
+              "range": ">=16.0.0 <16.2.11"
+            },
+            {
+              "title": "Next.js: Cache confusion of response bodies for requests with bodies containing invalid UTF-8 byte sequences",
+              "url": "https://github.com/advisories/GHSA-4633-3j49-mh5q",
+              "severity": "moderate",
+              "range": ">=16.0.0 <16.2.11"
+            },
+            {
+              "title": "Next.js: Unbounded Server Action payload in Edge runtime",
+              "url": "https://github.com/advisories/GHSA-4c39-4ccg-62r3",
+              "severity": "moderate",
+              "range": ">=16.0.0 <16.2.11"
+            },
+            {
+              "title": "Next.js: Server-Side Request Forgery in rewrites via attacker-controlled destination hostname",
+              "url": "https://github.com/advisories/GHSA-p9j2-gv94-2wf4",
+              "severity": "high",
+              "range": ">=16.0.0 <16.2.11"
+            },
+            {
+              "title": "Next.js: Denial of Service in the Image Optimization API using SVGs",
+              "url": "https://github.com/advisories/GHSA-q8wf-6r8g-63ch",
+              "severity": "moderate",
+              "range": ">=16.0.0 <16.2.11"
+            },
+            {
+              "title": "Next.js: Unauthenticated disclosure of internal Server Function endpoints",
+              "url": "https://github.com/advisories/GHSA-955p-x3mx-jcvp",
+              "severity": "moderate",
+              "range": ">=16.0.0 <16.2.11"
+            },
+            {
+              "title": "Next.js: Unauthenticated Remote Code Execution on windows-hosted servers",
+              "url": "https://github.com/advisories/GHSA-p293-qw3h-jr36",
+              "severity": "critical",
+              "range": ">=16.0.0 <16.3.3"
+            },
+            {
+              "title": "Next.js: Unauthenticated Remote Code Execution in Image Optimization API when AVIF files are used",
+              "url": "https://github.com/advisories/GHSA-2xp9-vwfh-vxw4",
+              "severity": "critical",
+              "range": ">=16.0.0 <16.3.3"
+            },
+            {
+              "title": "Next.js: Remote Code Execution in next/og ImageResponse",
+              "url": "https://github.com/advisories/GHSA-vcvr-r3jv-pc5j",
+              "severity": "critical",
+              "range": ">=16.2.0 <16.3.6"
+            },
+            {
+              "title": "Next.js has cache poisoning of SSG and ISR pages in self-hosted applications",
+              "url": "https://github.com/advisories/GHSA-4jqv-mc3x-m676",
+              "severity": "moderate",
+              "range": ">=16.0.0 <16.3.8"
+            },
+            {
+              "title": "Next.js has information disclosure in development server's Model Context Protocol endpoint",
+              "url": "https://github.com/advisories/GHSA-39w2-rjm5-chcv",
+              "severity": "low",
+              "range": ">=16.0.0 <16.3.8"
+            },
+            {
+              "title": "Next.js has information disclosure in App Router metadata image routes via dynamicParams bypass",
+              "url": "https://github.com/advisories/GHSA-f87g-xv8r-7p7x",
+              "severity": "moderate",
+              "range": ">=16.0.0 <16.3.8"
+            },
+            {
+              "title": "Next.js has cache poisoning in SSG/ISR rendering that leads to cross-user content substitution and persistent denial of service",
+              "url": "https://github.com/advisories/GHSA-mcj8-r9mp-w47p",
+              "severity": "moderate",
+              "range": ">=16.0.0 <16.3.8"
+            },
+            {
+              "title": "Next.js has Server-Side Request Forgery in Image Optimization",
+              "url": "https://github.com/advisories/GHSA-cjq9-62q9-8jv4",
+              "severity": "high",
+              "range": ">=16.0.0 <16.3.8"
+            },
+            {
+              "title": "Next.js: Unauthenticated Remote Code Execution in Image Optimization API when SVG files are used",
+              "url": "https://github.com/advisories/GHSA-2464-fhr4-w9xw",
+              "severity": "critical",
+              "range": ">=16.0.0 <=16.4.0"
+            },
+            {
+              "title": "Next.js: Denial of Service in App Router using Server Actions",
+              "url": "https://github.com/advisories/GHSA-p3m5-59mp-jv5r",
+              "severity": "high",
+              "range": ">=16.0.0 <=16.4.0"
+            },
+            {
+              "title": "Next.js: Unauthenticated Remote Code Execution in `use cache` functions returning typed arrays",
+              "url": "https://github.com/advisories/GHSA-673q-mjm6-r5xr",
+              "severity": "critical",
+              "range": ">=16.0.0 <=16.4.0"
+            },
+            "postcss",
+            "sharp"
+          ],
+          "fixAvailable": {
+            "name": "next",
+            "version": "16.4.6",
+            "isSemVerMajor": false
+          }
+        },
+        {
+          "name": "next-auth",
+          "installedVersions": [
+            "5.0.0-beta.31"
+          ],
+          "severity": "critical",
+          "isDirect": true,
+          "affectedRange": "<=0.0.0-pr.11562.ed0fce23 || 4.24.8 - 5.0.0-beta.31",
+          "via": [
+            "@auth/core",
+            {
+              "title": "Auth.js: Configuration errors can cause existence-based auth checks to fail open (auth object populated with an error)",
+              "url": "https://github.com/advisories/GHSA-8fpg-xm3f-6cx3",
+              "severity": "critical",
+              "range": ">=5.0.0-beta.0 <=5.0.0-beta.31"
+            },
+            {
+              "title": "Auth.js: Email normalizer validates the address before Unicode normalization, allowing a homoglyph @ bypass",
+              "url": "https://github.com/advisories/GHSA-7rqj-j65f-68wh",
+              "severity": "critical",
+              "range": ">=5.0.0-beta.1 <=5.0.0-beta.31"
+            },
+            {
+              "title": "Auth.js: getToken() throws an uncaught exception on malformed Bearer authorization headers",
+              "url": "https://github.com/advisories/GHSA-xmf8-cvqr-rfgj",
+              "severity": "high",
+              "range": ">=5.0.0-beta.0 <=5.0.0-beta.31"
+            },
+            {
+              "title": "Auth.js: OAuth state, nonce, and PKCE check cookies are not bound to the provider that created them",
+              "url": "https://github.com/advisories/GHSA-x445-f3h2-j279",
+              "severity": "moderate",
+              "range": ">=5.0.0-beta.1 <=5.0.0-beta.31"
+            }
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "postcss",
+          "installedVersions": [
+            "8.5.10"
+          ],
+          "severity": "high",
+          "isDirect": false,
+          "affectedRange": "<=8.5.22",
+          "via": [
+            {
+              "title": "PostCSS: Arbitrary file read and information disclosure via attacker-controlled sourceMappingURL in CSS comments",
+              "url": "https://github.com/advisories/GHSA-6g55-p6wh-862q",
+              "severity": "high",
+              "range": "<=8.5.11"
+            },
+            {
+              "title": "PostCSS: incomplete fix of GHSA-6g55-p6wh-862q \u2014 attacker-controlled sourceMappingURL reads arbitrary .map files when `from` is unset",
+              "url": "https://github.com/advisories/GHSA-fxqj-rqcc-2cmp",
+              "severity": "moderate",
+              "range": "<=8.5.22"
+            },
+            {
+              "title": "PostCSS: Path Traversal in Previous Source Map Auto-Loading (sourceMappingURL) leads to Arbitrary .map File Disclosure",
+              "url": "https://github.com/advisories/GHSA-r28c-9q8g-f849",
+              "severity": "high",
+              "range": "<=8.5.17"
+            }
+          ],
+          "fixAvailable": {
+            "name": "next",
+            "version": "16.4.6",
+            "isSemVerMajor": false
+          }
+        },
+        {
+          "name": "prisma",
+          "installedVersions": [
+            "7.7.0"
+          ],
+          "severity": "high",
+          "isDirect": true,
+          "affectedRange": "6.13.0-dev.1 - 7.10.0 || 8.0.0-rc.3 - 8.1.0-dev.6",
+          "via": [
+            "@prisma/config",
+            "@prisma/dev",
+            "mysql2"
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "sharp",
+          "installedVersions": [
+            "0.34.5"
+          ],
+          "severity": "high",
+          "isDirect": false,
+          "affectedRange": "<=0.35.5-rc.1",
+          "via": [
+            {
+              "title": "sharp inherited vulnerabilities in libvips: CVE-2026-33327, CVE-2026-33328, CVE-2026-35590, CVE-2026-35591",
+              "url": "https://github.com/advisories/GHSA-f88m-g3jw-g9cj",
+              "severity": "high",
+              "range": "<0.35.0"
+            },
+            {
+              "title": "sharp: Vulnerabilities in libheif: GHSA-g89c-p67h-r497 and GHSA-2jg2-4ch7-h545",
+              "url": "https://github.com/advisories/GHSA-rgj7-g3m4-5g8c",
+              "severity": "high",
+              "range": "<0.35.4"
+            },
+            {
+              "title": "sharp : Vulnerability in librsvg dependency CVE-2026-96889",
+              "url": "https://github.com/advisories/GHSA-wq5f-xc86-pv6w",
+              "severity": "high",
+              "range": "<0.35.5"
+            }
+          ],
+          "fixAvailable": {
+            "name": "next",
+            "version": "16.4.6",
+            "isSemVerMajor": false
+          }
+        },
+        {
+          "name": "source-map-js",
+          "installedVersions": [
+            "1.2.1"
+          ],
+          "severity": "high",
+          "isDirect": false,
+          "affectedRange": "1.0.0 - 1.2.1",
+          "via": [
+            {
+              "title": "source-map-js allows event-loop denial of service through indexed source-map section offsets",
+              "url": "https://github.com/advisories/GHSA-68fv-2mgg-jv7q",
+              "severity": "high",
+              "range": ">=1.0.0 <1.2.2"
+            }
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "valibot",
+          "installedVersions": [
+            "1.2.0"
+          ],
+          "severity": "moderate",
+          "isDirect": false,
+          "affectedRange": "<=1.4.1",
+          "via": [
+            {
+              "title": "Valibot: record() issue paths can make flatten() throw for inherited Object property names",
+              "url": "https://github.com/advisories/GHSA-5qjj-4xww-7phc",
+              "severity": "moderate",
+              "range": "<=1.4.1"
+            }
+          ],
+          "fixAvailable": true
+        },
+        {
+          "name": "zod",
+          "installedVersions": [
+            "4.3.6"
+          ],
+          "severity": "high",
+          "isDirect": true,
+          "affectedRange": "<4.6.6",
+          "via": [
+            {
+              "title": "Zod can exhaust memory while validating oversized constrained collections",
+              "url": "https://github.com/advisories/GHSA-mrhx-c7xc-m3w5",
+              "severity": "high",
+              "range": "<4.6.6"
+            }
+          ],
+          "fixAvailable": true
+        }
+      ]
+    }
+  }
+}

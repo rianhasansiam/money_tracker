@@ -338,6 +338,7 @@ describeWithServer("critical production workflow", () => {
     const nextPage = await dashboardActions.loadMoreTransactionHistory(
       teamId,
       dashboard?.transactionHistory.nextCursor ?? "",
+      dashboard?.snapshotRevision ?? "",
     );
     expect(nextPage).toMatchObject({ status: "success" });
     if (nextPage.status !== "success") {

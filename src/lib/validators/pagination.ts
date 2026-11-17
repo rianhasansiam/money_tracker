@@ -4,8 +4,8 @@ const DATABASE_CURSOR_MAX_LENGTH = 32;
 
 export const transactionCursorSchema = z
   .string()
-  .max(DATABASE_CURSOR_MAX_LENGTH, "Invalid history cursor.")
-  .cuid("Invalid history cursor.");
+  .max(512, "Invalid history cursor.")
+  .regex(/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]{43}$/, "Invalid history cursor.");
 
 export const collectionCursorSchema = z
   .string()

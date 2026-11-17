@@ -1,0 +1,203 @@
+{
+  "fixtureRows": 3067,
+  "targetTeamRows": 67,
+  "history": [
+    {
+      "QUERY PLAN": [
+        {
+          "Plan": {
+            "Node Type": "Limit",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 98.59,
+            "Total Cost": 98.59,
+            "Plan Rows": 1,
+            "Plan Width": 38,
+            "Actual Startup Time": 0.027,
+            "Actual Total Time": 0.028,
+            "Actual Rows": 26,
+            "Actual Loops": 1,
+            "Shared Hit Blocks": 5,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "Plans": [
+              {
+                "Node Type": "Sort",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 98.59,
+                "Total Cost": 98.59,
+                "Plan Rows": 1,
+                "Plan Width": 38,
+                "Actual Startup Time": 0.026,
+                "Actual Total Time": 0.027,
+                "Actual Rows": 26,
+                "Actual Loops": 1,
+                "Sort Key": [
+                  "\"transactionDate\" DESC",
+                  "\"createdAt\" DESC",
+                  "id DESC"
+                ],
+                "Sort Method": "quicksort",
+                "Sort Space Used": 27,
+                "Sort Space Type": "Memory",
+                "Shared Hit Blocks": 5,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0,
+                "Plans": [
+                  {
+                    "Node Type": "Index Scan",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Scan Direction": "Forward",
+                    "Index Name": "Transaction_teamId_type_idx",
+                    "Relation Name": "Transaction",
+                    "Alias": "Transaction",
+                    "Startup Cost": 0.28,
+                    "Total Cost": 98.58,
+                    "Plan Rows": 1,
+                    "Plan Width": 38,
+                    "Actual Startup Time": 0.007,
+                    "Actual Total Time": 0.015,
+                    "Actual Rows": 42,
+                    "Actual Loops": 1,
+                    "Index Cond": "((\"teamId\" = 'cmwjl832n00bu8vojjc6h5gpw'::text) AND (type = 'ADD'::\"TransactionType\"))",
+                    "Rows Removed by Index Recheck": 0,
+                    "Filter": "(((note)::text ~~* '%receipt%'::text) AND (\"transactionDate\" >= '2026-10-01'::date))",
+                    "Rows Removed by Filter": 4,
+                    "Shared Hit Blocks": 5,
+                    "Shared Read Blocks": 0,
+                    "Shared Dirtied Blocks": 0,
+                    "Shared Written Blocks": 0,
+                    "Local Hit Blocks": 0,
+                    "Local Read Blocks": 0,
+                    "Local Dirtied Blocks": 0,
+                    "Local Written Blocks": 0,
+                    "Temp Read Blocks": 0,
+                    "Temp Written Blocks": 0
+                  }
+                ]
+              }
+            ]
+          },
+          "Planning": {
+            "Shared Hit Blocks": 71,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0
+          },
+          "Planning Time": 0.239,
+          "Triggers": [],
+          "Execution Time": 0.035
+        }
+      ]
+    }
+  ],
+  "aggregate": [
+    {
+      "QUERY PLAN": [
+        {
+          "Plan": {
+            "Node Type": "Aggregate",
+            "Strategy": "Sorted",
+            "Partial Mode": "Simple",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 0.28,
+            "Total Cost": 98.26,
+            "Plan Rows": 1,
+            "Plan Width": 20,
+            "Actual Startup Time": 0.012,
+            "Actual Total Time": 0.015,
+            "Actual Rows": 2,
+            "Actual Loops": 1,
+            "Group Key": [
+              "type"
+            ],
+            "Shared Hit Blocks": 8,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "Plans": [
+              {
+                "Node Type": "Index Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Scan Direction": "Forward",
+                "Index Name": "Transaction_teamId_type_idx",
+                "Relation Name": "Transaction",
+                "Alias": "Transaction",
+                "Startup Cost": 0.28,
+                "Total Cost": 98.25,
+                "Plan Rows": 1,
+                "Plan Width": 8,
+                "Actual Startup Time": 0.003,
+                "Actual Total Time": 0.012,
+                "Actual Rows": 62,
+                "Actual Loops": 1,
+                "Index Cond": "(\"teamId\" = 'cmwjl832n00bu8vojjc6h5gpw'::text)",
+                "Rows Removed by Index Recheck": 0,
+                "Filter": "((note)::text ~~* '%receipt%'::text)",
+                "Rows Removed by Filter": 5,
+                "Shared Hit Blocks": 8,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0
+              }
+            ]
+          },
+          "Planning": {
+            "Shared Hit Blocks": 3,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0
+          },
+          "Planning Time": 0.05,
+          "Triggers": [],
+          "Execution Time": 0.022
+        }
+      ]
+    }
+  ]
+}

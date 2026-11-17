@@ -10,6 +10,7 @@ import {
   transferTeamOwnershipWithAudit,
 } from "@/lib/admin-workflows";
 import { auth } from "@/lib/auth";
+import { canonicalSignInUrl } from "@/lib/access-instructions";
 import { db } from "@/lib/db";
 import {
   InvitationConflictError,
@@ -49,11 +50,18 @@ export type AdminActionResult =
   | {
       status: "success";
       message: string;
+      invitation?: {
+        outcome: "created" | "reissued" | "unchanged" | "already_active";
+        email: string;
+        expiresAt: string | null;
+        signInUrl: string;
+      };
     }
   | {
       status: "error";
       message: string;
       retryAfterSeconds?: number;
+      code?: "RECENT_AUTHENTICATION_REQUIRED";
     };
 
 const ADMIN_REQUEST_UNAVAILABLE_MESSAGE =
@@ -154,6 +162,7 @@ function mutationErrorResult(result: AdminMutationResult): AdminActionResult | n
       return {
         status: "error",
         message: RECENT_AUTHENTICATION_MESSAGE,
+        code: "RECENT_AUTHENTICATION_REQUIRED",
       };
     case "confirmation_mismatch":
       return {
@@ -201,6 +210,7 @@ function unexpectedAdminError(
   if (expectedWorkflowError(error)) {
     return {
       status: "error",
+      ...(error instanceof RecentAuthenticationRequiredError ? { code: "RECENT_AUTHENTICATION_REQUIRED" as const } : {}),
       message:
         error instanceof RecentAuthenticationRequiredError
           ? RECENT_AUTHENTICATION_MESSAGE
@@ -255,9 +265,16 @@ export async function provisionInvitationAction(input: {
 
   const correlationId = createCorrelationId();
   const now = new Date();
+  const signInUrl = canonicalSignInUrl(process.env);
+  if (!signInUrl) {
+    return {
+      status: "error",
+      message: "The trusted sign-in address is unavailable. Ask the operator to configure the canonical application URL before creating access instructions. No invitation was changed.",
+    };
+  }
 
   try {
-    await provisionInvitation(invitationRepository, {
+    const invitation = await provisionInvitation(invitationRepository, {
       actorUserId,
       email: parsedInput.data.email,
       now,
@@ -270,8 +287,19 @@ export async function provisionInvitationAction(input: {
 
     return {
       status: "success",
-      message:
-        "Invitation state is up to date. The invited Google identity may sign in while the invitation remains valid.",
+      message: invitation.status === "already_active"
+        ? "This account is already active. No new invitation was created. No email has been sent."
+        : invitation.status === "unchanged"
+          ? "This invitation is already valid. Its existing expiry is unchanged. No email has been sent."
+          : invitation.status === "reissued"
+            ? "Invitation reissued. No email has been sent."
+            : "Invitation created. No email has been sent.",
+      invitation: {
+        outcome: invitation.status,
+        email: parsedInput.data.email,
+        expiresAt: invitation.expiresAt?.toISOString() ?? null,
+        signInUrl,
+      },
     };
   } catch (error) {
     return unexpectedAdminError(
@@ -646,6 +674,7 @@ export async function restoreTeamAction(
       return {
         status: "error",
         message: RECENT_AUTHENTICATION_MESSAGE,
+        code: "RECENT_AUTHENTICATION_REQUIRED",
       };
     }
 

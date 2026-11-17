@@ -9,7 +9,7 @@ function Label({
   return (
     <LabelPrimitive.Root
       data-slot="label"
-      className={cn("text-sm font-medium text-foreground", className)}
+      className={cn("block min-w-0 text-sm font-medium leading-6 text-foreground wrap-anywhere", className)}
       {...props}
     />
   );

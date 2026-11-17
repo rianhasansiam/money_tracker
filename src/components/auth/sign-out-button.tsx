@@ -13,6 +13,7 @@ export function SignOutButton({
 }: SignOutButtonProps) {
   return (
     <form
+      data-session-navigation="signout"
       action={async () => {
         "use server";
 

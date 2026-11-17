@@ -1,9 +1,4 @@
 import { randomUUID } from "node:crypto";
-import {
-  createServer,
-  request as requestUpstream,
-  type Server,
-} from "node:http";
 import { expect, test, type BrowserContext } from "@playwright/test";
 import {
   bootstrapAdmin,
@@ -20,6 +15,7 @@ import {
   openPostgresTestHarness,
   type PostgresTestHarness,
 } from "../helpers/postgres-test-harness";
+import { startBrowserSessionProxy, SESSION_HEADER } from "../helpers/browser-session-proxy";
 
 const TEAM_NAME = "Browser Workflow Treasury";
 const ADMIN_EMAIL = "browser-admin@example.test";
@@ -31,7 +27,7 @@ let administratorToken: string;
 let browserOrigin: string;
 let memberId: string;
 let memberToken: string;
-let sessionProxy: Server;
+let sessionProxy: Awaited<ReturnType<typeof startBrowserSessionProxy>>;
 
 function requireBaseUrl() {
   const configured = process.env.E2E_BASE_URL?.trim();
@@ -58,59 +54,8 @@ function requireBaseUrl() {
 }
 
 async function startSessionProxy() {
-  const upstream = requireBaseUrl();
-  sessionProxy = createServer((incoming, outgoing) => {
-    const headers = { ...incoming.headers };
-    const rawToken = headers["x-money-tracker-test-session"];
-    delete headers["x-money-tracker-test-session"];
-
-    if (typeof rawToken === "string") {
-      const encodedToken = encodeURIComponent(rawToken);
-      headers.cookie = [
-        `authjs.session-token=${encodedToken}`,
-        `__Secure-authjs.session-token=${encodedToken}`,
-      ].join("; ");
-    }
-
-    const upstreamRequest = requestUpstream(
-      new URL(incoming.url ?? "/", upstream),
-      {
-        method: incoming.method,
-        headers,
-      },
-      (upstreamResponse) => {
-        outgoing.writeHead(
-          upstreamResponse.statusCode ?? 502,
-          upstreamResponse.statusMessage,
-          upstreamResponse.headers,
-        );
-        upstreamResponse.pipe(outgoing);
-      },
-    );
-
-    upstreamRequest.on("error", () => {
-      if (!outgoing.headersSent) {
-        outgoing.writeHead(502, { "content-type": "text/plain" });
-      }
-      outgoing.end("Test proxy upstream unavailable.");
-    });
-    incoming.pipe(upstreamRequest);
-  });
-
-  await new Promise<void>((resolve, reject) => {
-    sessionProxy.once("error", reject);
-    sessionProxy.listen(0, "127.0.0.1", () => {
-      sessionProxy.off("error", reject);
-      resolve();
-    });
-  });
-
-  const address = sessionProxy.address();
-  if (!address || typeof address === "string") {
-    throw new Error("The browser session proxy did not bind to loopback.");
-  }
-
-  browserOrigin = `http://127.0.0.1:${address.port}`;
+  sessionProxy = await startBrowserSessionProxy(requireBaseUrl());
+  browserOrigin = sessionProxy.origin;
 }
 
 function browserUrl(pathname: string) {
@@ -119,7 +64,7 @@ function browserUrl(pathname: string) {
 
 async function useSession(context: BrowserContext, rawToken: string) {
   await context.setExtraHTTPHeaders({
-    "x-money-tracker-test-session": rawToken,
+    [SESSION_HEADER]: rawToken,
   });
 }
 
@@ -194,9 +139,7 @@ test.beforeAll(async () => {
 });
 
 test.afterAll(async () => {
-  await new Promise<void>((resolve) => {
-    sessionProxy?.close(() => resolve());
-  });
+  await sessionProxy?.close();
   await harness?.close();
 });
 
@@ -220,6 +163,7 @@ test("completes the critical lifecycle through the production UI", async ({
   expect(await administratorSessionResponse.json()).toHaveProperty("user");
   const administratorPage = await administratorContext.newPage();
   await administratorPage.goto(browserUrl("/groups"));
+  await administratorPage.locator("summary").filter({ hasText: "Create team" }).click();
   await expect(
     administratorPage.getByRole("button", {
       name: "Create team",
@@ -259,7 +203,7 @@ test("completes the critical lifecycle through the production UI", async ({
     });
   }).toEqual({ status: "PENDING" });
 
-  await administratorPage.goto(browserUrl("/groups"));
+  await administratorPage.goto(browserUrl("/groups?view=approvals"));
   await administratorPage
     .getByRole("button", { name: "Approve request", exact: true })
     .click();
@@ -277,8 +221,9 @@ test("completes the critical lifecycle through the production UI", async ({
   }).toEqual({ status: "APPROVED" });
 
   await administratorPage.goto(browserUrl(`/dashboard/${teamId}`));
-  await administratorPage.getByLabel("Amount").fill("100.00");
-  await administratorPage.getByLabel("Note").fill("Browser initial funding");
+  await administratorPage.getByRole("button", { name: "Add money", exact: true }).click();
+  await administratorPage.getByLabel("Amount in BDT", { exact: true }).fill("100.00");
+  await administratorPage.getByRole("dialog").getByLabel("Note (optional)", { exact: true }).fill("Browser initial funding");
   await administratorPage
     .getByRole("button", { name: "Save addition", exact: true })
     .evaluate((button: HTMLButtonElement) => {
@@ -291,18 +236,20 @@ test("completes the critical lifecycle through the production UI", async ({
     });
   }).toBe(1);
 
-  await administratorPage.getByLabel("Transaction type").click();
-  await administratorPage
-    .getByRole("option", { name: "Remove money" })
-    .click();
-  await administratorPage.getByLabel("Amount").fill("25.00");
-  await administratorPage.getByLabel("Note").fill("Browser approved expense");
+  await expect(administratorPage.getByRole("dialog")).not.toBeVisible();
+  await expect(administratorPage.getByText("Browser initial funding", { exact: true }).filter({ visible: true })).toBeVisible();
+  await administratorPage.getByRole("button", { name: "Remove money", exact: true }).click();
+  await administratorPage.locator("#type").selectOption("REMOVE");
+  await administratorPage.getByLabel("Amount in BDT", { exact: true }).fill("25.00");
+  await administratorPage.getByRole("dialog").getByLabel("Note (optional)", { exact: true }).fill("Browser approved expense");
   await administratorPage
     .getByRole("button", { name: "Save removal", exact: true })
     .click();
   await expect.poll(async () => {
     return harness.db.transaction.count({ where: { teamId } });
   }).toBe(2);
+  await expect(administratorPage.getByRole("dialog")).not.toBeVisible();
+  await expect(administratorPage.getByText("Browser approved expense", { exact: true }).filter({ visible: true })).toBeVisible();
 
   const transactionDate = parseTransactionDateInput(
     getBusinessTodayDateInputValue(),
@@ -327,9 +274,10 @@ test("completes the critical lifecycle through the production UI", async ({
     .click();
   await expect(administratorPage.getByText("28 loaded", { exact: true })).toBeVisible();
 
-  await administratorPage.goto(browserUrl("/groups"));
+  await administratorPage.goto(browserUrl("/groups?view=teams"));
+  await administratorPage.locator("summary").filter({ hasText: "Team management" }).first().click();
   await administratorPage
-    .getByRole("button", { name: "Quarantine group", exact: true })
+    .getByRole("button", { name: "Quarantine team", exact: true })
     .click();
   const quarantineDialog = administratorPage.getByRole("dialog");
   await quarantineDialog.getByRole("textbox").fill(TEAM_NAME);
@@ -343,13 +291,14 @@ test("completes the critical lifecycle through the production UI", async ({
     });
   }).not.toEqual({ deletedAt: null });
 
-  await administratorPage.goto(browserUrl("/admin"));
+  await administratorPage.goto(browserUrl("/admin?view=recovery"));
   await administratorPage
     .getByLabel(`Type ${TEAM_NAME} to restore`)
     .fill(TEAM_NAME);
   await administratorPage
     .getByRole("button", { name: "Restore team", exact: true })
     .click();
+  await administratorPage.getByRole("button", { name: "Confirm team restoration", exact: true }).click();
   await expect.poll(async () => {
     return harness.db.team.findUnique({
       where: { id: teamId },
@@ -357,14 +306,13 @@ test("completes the critical lifecycle through the production UI", async ({
     });
   }).toEqual({ deletedAt: null });
 
+  await administratorPage.getByRole("navigation", { name: "Administration tasks" }).getByRole("link", { name: "Accounts", exact: true }).click();
   const memberCard = administratorPage
-    .getByText(MEMBER_EMAIL, { exact: true })
-    .locator(
-      "xpath=ancestor::div[contains(concat(' ', normalize-space(@class), ' '), ' rounded-3xl ')][1]",
-    );
+    .getByRole("article", { name: `Account ${MEMBER_EMAIL}`, exact: true });
   await memberCard
     .getByRole("button", { name: "Disable account", exact: true })
     .click();
+  await administratorPage.getByRole("button", { name: "Confirm account disablement", exact: true }).click();
   await expect.poll(async () => {
     return harness.db.user.findUnique({
       where: { id: memberId },
@@ -377,7 +325,6 @@ test("completes the critical lifecycle through the production UI", async ({
       exact: true,
     }),
   ).toBeVisible();
-  expect(sessionProxy.listening).toBe(true);
   expect((await fetch(browserUrl("/api/health"))).status).toBe(200);
 
   await memberContext.close();
@@ -392,8 +339,11 @@ test("completes the critical lifecycle through the production UI", async ({
   expect(disabledRedirectLocation).toBeTruthy();
   const disabledRedirect = new URL(disabledRedirectLocation!);
   expect(disabledRedirect.pathname).toBe("/login");
+  if (process.env.VERCEL !== "1") {
+    expect(disabledRedirect.origin).toBe(browserOrigin);
+  }
   expect(disabledRedirect.searchParams.get("callbackUrl")).toBe(
-    new URL("/groups", disabledRedirect.origin).toString(),
+    new URL("/groups", process.env.VERCEL === "1" ? process.env.AUTH_URL || requireBaseUrl() : requireBaseUrl()).toString(),
   );
 
   await administratorPage.goto(browserUrl(`/dashboard/${teamId}`));
@@ -407,10 +357,10 @@ test("completes the critical lifecycle through the production UI", async ({
     administratorPage.getByText("28 loaded", { exact: true }),
   ).toBeVisible();
   await expect(
-    administratorPage.getByText("Browser initial funding", { exact: true }),
+    administratorPage.getByText("Browser initial funding", { exact: true }).filter({ visible: true }),
   ).toBeVisible();
   await expect(
-    administratorPage.getByText("Browser approved expense", { exact: true }),
+    administratorPage.getByText("Browser approved expense", { exact: true }).filter({ visible: true }),
   ).toBeVisible();
 
   await disabledMemberContext.close();

@@ -46,10 +46,10 @@
     "ci": "npm run db:generate && npm run db:validate && npm run lint && npm run typecheck && npm run test:unit && npm run test:integration && npm run test:authorization && npm run knip && npm run build:webpack && npm run verify:proxy-manifest && npm run build && npm run verify:proxy-manifest && npm run audit"
   },
   "dependencies": {
-    "@auth/prisma-adapter": "^2.11.2",
+    "@auth/prisma-adapter": "^2.11.3",
     "@hookform/resolvers": "^5.2.2",
-    "@prisma/adapter-pg": "^7.7.0",
-    "@prisma/client": "^7.7.0",
+    "@prisma/adapter-pg": "^7.10.1",
+    "@prisma/client": "^7.10.1",
     "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-separator": "^1.1.8",
@@ -57,15 +57,15 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^1.8.0",
-    "next": "16.2.10",
-    "next-auth": "^5.0.0-beta.31",
+    "next": "16.4.6",
+    "next-auth": "5.0.0-beta.32",
     "pg": "^8.20.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-hook-form": "^7.72.1",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.5.0",
-    "zod": "^4.3.6"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@playwright/test": "1.61.1",
@@ -75,24 +75,17 @@
     "@types/react-dom": "^19",
     "dotenv": "^17.4.2",
     "eslint": "^9",
-    "eslint-config-next": "16.2.10",
+    "eslint-config-next": "16.4.6",
     "knip": "^6.26.0",
-    "prisma": "^7.7.0",
+    "prisma": "^7.10.1",
     "tailwindcss": "^4",
     "tsx": "^4.23.1",
     "typescript": "^5",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.12"
   },
   "overrides": {
-    "next": {
-      "postcss": "8.5.10"
-    },
-    "prisma": {
-      "@prisma/dev": {
-        "@hono/node-server": "1.19.13",
-        "hono": "4.12.25",
-        "fast-uri": "3.1.2"
-      }
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "11.0.8"
     }
   }
 }

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type {
   AdapterAccount,
   AdapterSession,
@@ -25,15 +25,24 @@ const activeUser = {
   deletedAt: Date | null;
 };
 
-function session(sessionToken = rawSessionToken): AdapterSession {
+const createdAt = new Date("2026-11-16T00:00:00.000Z");
+const deadline = new Date("2026-11-16T08:00:00.000Z");
+
+function session(sessionToken = rawSessionToken): AdapterSession & { createdAt: Date } {
   return {
     sessionToken,
     userId: activeUser.id,
-    expires: new Date("2026-07-15T18:00:00.000Z"),
+    createdAt,
+    expires: deadline,
   };
 }
 
 describe("security-hardened Auth.js adapter", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(createdAt);
+  });
+  afterEach(() => vi.useRealTimers());
   it("never gives provider bearer/token metadata to persistent storage", async () => {
     const linkAccount = vi.fn(async (account: AdapterAccount) => account);
     const adapter = hardenAuthAdapter({ linkAccount });
@@ -112,7 +121,14 @@ describe("security-hardened Auth.js adapter", () => {
     const deleteSession = vi.fn(async (lookupToken: string) =>
       session(lookupToken),
     );
-    const adapter = hardenAuthAdapter({ updateSession, deleteSession });
+    const adapter = hardenAuthAdapter({
+      updateSession,
+      deleteSession,
+      getSessionAndUser: async () => ({
+        user: activeUser,
+        session: { ...session(hashSessionToken(rawSessionToken)), expires: new Date(createdAt.getTime() + 60 * 60 * 1000) },
+      }),
+    });
 
     const updated = await adapter.updateSession?.(session());
     const deleted = await adapter.deleteSession?.(rawSessionToken);
@@ -163,5 +179,99 @@ describe("security-hardened Auth.js adapter", () => {
     const adapter = hardenAuthAdapter({ getSessionAndUser, deleteSession });
 
     await expect(adapter.getSessionAndUser?.(rawSessionToken)).resolves.toBeNull();
+  });
+
+  it("caps session creation, repairs legacy expiry, and returns the fixed deadline", async () => {
+    const createSession = vi.fn(async (value: AdapterSession) => value);
+    const updateSession = vi.fn(async (value: Partial<AdapterSession> & Pick<AdapterSession, "sessionToken">) => ({ ...session(value.sessionToken), ...value }));
+    const adapter = hardenAuthAdapter({
+      createSession,
+      updateSession,
+      getSessionAndUser: async () => ({
+        user: activeUser,
+        session: { ...session(hashSessionToken(rawSessionToken)), expires: new Date("2026-11-17T00:00:00.000Z") },
+      }),
+    });
+    const created = await adapter.createSession?.({ ...session(), expires: new Date("2026-11-17T00:00:00.000Z") });
+    expect(createSession).toHaveBeenCalledWith(expect.objectContaining({ createdAt, expires: deadline }));
+    expect(created?.expires).toEqual(deadline);
+    const read = await adapter.getSessionAndUser?.(rawSessionToken);
+    expect(read?.session.expires).toEqual(deadline);
+    expect(updateSession).toHaveBeenCalledWith({ sessionToken: hashSessionToken(rawSessionToken), expires: deadline });
+  });
+
+  it("does not extend the deadline after repeated renewal or change creation/ownership", async () => {
+    let stored = { ...session(hashSessionToken(rawSessionToken)), expires: new Date(createdAt.getTime() + 60 * 60 * 1000) };
+    const updateSession = vi.fn(async (value: Partial<AdapterSession> & Pick<AdapterSession, "sessionToken">) => {
+      stored = { ...stored, ...value };
+      return stored;
+    });
+    const adapter = hardenAuthAdapter({
+      getSessionAndUser: async () => ({ user: activeUser, session: stored }),
+      updateSession,
+    });
+    for (const elapsed of [30 * 60_000, 4 * 60 * 60_000, 8 * 60 * 60_000 - 1]) {
+      vi.setSystemTime(createdAt.getTime() + elapsed);
+      const renewed = await adapter.updateSession?.({
+        sessionToken: rawSessionToken,
+        expires: new Date(Date.now() + 8 * 60 * 60_000),
+        userId: "another-user",
+      });
+      expect(renewed?.expires).toEqual(deadline);
+      expect(stored.createdAt).toEqual(createdAt);
+      expect(stored.userId).toBe(activeUser.id);
+    }
+    expect(updateSession).toHaveBeenCalledTimes(1);
+  });
+
+  it("normalizes a still-valid shorter legacy expiry before Auth.js consumes it", async () => {
+    vi.setSystemTime(createdAt.getTime() + 30 * 60_000);
+    const updateSession = vi.fn(async (value: Partial<AdapterSession> & Pick<AdapterSession, "sessionToken">) => ({ ...session(value.sessionToken), ...value }));
+    const deleteSession = vi.fn(async () => session());
+    const adapter = hardenAuthAdapter({
+      getSessionAndUser: async () => ({
+        user: activeUser,
+        session: { ...session(), expires: new Date(createdAt.getTime() + 60 * 60_000) },
+      }),
+      updateSession,
+      deleteSession,
+    });
+    expect((await adapter.getSessionAndUser?.(rawSessionToken))?.session.expires).toEqual(deadline);
+    expect(updateSession).toHaveBeenCalledWith({ sessionToken: hashSessionToken(rawSessionToken), expires: deadline });
+    vi.setSystemTime(createdAt.getTime() + 60 * 60_000);
+    expect(await adapter.getSessionAndUser?.(rawSessionToken)).toBeNull();
+    expect(deleteSession).toHaveBeenCalledWith(hashSessionToken(rawSessionToken));
+    expect(updateSession).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([8 * 60 * 60_000, 8 * 60 * 60_000 + 1, 9 * 60 * 60_000])(
+    "rejects and cleans lookup/update at elapsed %i even with future rolling expiry",
+    async (elapsed) => {
+      vi.setSystemTime(createdAt.getTime() + elapsed);
+      const deleteSession = vi.fn(async () => session());
+      const updateSession = vi.fn(async (value: AdapterSession) => value);
+      const adapter = hardenAuthAdapter({
+        getSessionAndUser: async () => ({
+          user: activeUser,
+          session: { ...session(), expires: new Date(Date.now() + 60 * 60_000) },
+        }),
+        updateSession,
+        deleteSession,
+      });
+      expect(await adapter.getSessionAndUser?.(rawSessionToken)).toBeNull();
+      expect(await adapter.updateSession?.({ sessionToken: rawSessionToken, expires: new Date(Date.now() + 8 * 60 * 60_000) })).toBeNull();
+      expect(deleteSession).toHaveBeenCalledWith(hashSessionToken(rawSessionToken));
+      expect(updateSession).not.toHaveBeenCalled();
+    },
+  );
+
+  it("fails closed for a persisted session missing its immutable creation timestamp", async () => {
+    const deleteSession = vi.fn(async () => session());
+    const adapter = hardenAuthAdapter({
+      getSessionAndUser: async () => ({ user: activeUser, session: { sessionToken: rawSessionToken, userId: activeUser.id, expires: deadline } }),
+      deleteSession,
+    });
+    expect(await adapter.getSessionAndUser?.(rawSessionToken)).toBeNull();
+    expect(deleteSession).toHaveBeenCalledWith(hashSessionToken(rawSessionToken));
   });
 });

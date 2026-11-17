@@ -499,9 +499,9 @@ describeWithServer("production route smoke", () => {
       memberDashboard.text(),
     ]);
 
-    expect(teamAdminHtml).toContain("Create transaction");
-    expect(moderatorHtml).toContain("Create transaction");
-    expect(memberHtml).not.toContain("Create transaction");
+    expect(teamAdminHtml).toContain('id="transaction-form"');
+    expect(moderatorHtml).toContain('id="transaction-form"');
+    expect(memberHtml).not.toContain('id="transaction-form"');
     expect(memberHtml).toContain("View-only access");
 
     const nonGlobalAdminCookies = [

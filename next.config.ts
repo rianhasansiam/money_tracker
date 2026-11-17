@@ -3,6 +3,9 @@ import { buildApplicationHeaderRules } from "./src/lib/security-headers";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  outputFileTracingExcludes: {
+    "/*": ["./.env*"],
+  },
   outputFileTracingIncludes: {
     "/*": ["node_modules/@prisma/adapter-pg/**/*"],
   },

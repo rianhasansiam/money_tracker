@@ -12,6 +12,7 @@ import {
   recordAuditEvent,
 } from "@/lib/audit-events";
 import { db } from "@/lib/db";
+import { ADMIN_VIEWS, type AdminView } from "@/lib/admin-navigation";
 import { hasPrismaErrorCode } from "@/lib/prisma-errors";
 import { enforceUserRateLimit } from "@/lib/rate-limit";
 import {
@@ -60,6 +61,12 @@ export interface AdminConsoleTeamMemberDto {
   status: TeamMembershipStatus;
 }
 
+interface AdminMemberProjection {
+  role: TeamMemberRole;
+  status: TeamMembershipStatus;
+  user: { name: string | null; email: string | null };
+}
+
 export interface AdminConsoleTeamDto {
   teamId: string;
   name: string;
@@ -69,6 +76,7 @@ export interface AdminConsoleTeamDto {
   members: AdminConsoleTeamMemberDto[];
   membersTruncated: boolean;
   nextMemberCursor: string | null;
+  recoveryEligibility?: "eligible" | "expired" | "active";
 }
 
 export interface AdminConsoleDto {
@@ -146,6 +154,7 @@ export interface AdminWorkflowRepository {
     actorUserId: string,
     searchQuery?: string,
     cursors?: AdminConsoleCursors,
+    view?: AdminView,
   ): Promise<AdminConsoleDto | null>;
   setUserEnabled(input: SetUserEnabledInput): Promise<AdminMutationResult>;
   setGlobalRole(input: SetGlobalRoleInput): Promise<AdminMutationResult>;
@@ -466,10 +475,15 @@ export function createPrismaAdminWorkflowRepository(
   database: AdminDatabase,
 ): AdminWorkflowRepository {
   return {
-    async getConsoleData(actorUserId, searchQuery, cursors = {}) {
+    async getConsoleData(actorUserId, searchQuery, cursors = {}, view) {
       if (!actorUserId || actorUserId.length > 191) {
         return null;
       }
+      if (view !== undefined && !ADMIN_VIEWS.includes(view)) return null;
+      const readUsers = view === undefined || view === "accounts";
+      const readInvitations = view === undefined || view === "invitations";
+      const readTeams = view === undefined || view === "access" || view === "recovery";
+      const readMembers = view === undefined || view === "access";
 
       const normalizedSearch = searchQuery?.trim();
 
@@ -477,11 +491,11 @@ export function createPrismaAdminWorkflowRepository(
         return null;
       }
 
-      const userCursor = parseEmailCursor(cursors.users);
-      const invitationCursor = parseEmailCursor(cursors.invitations);
-      const teamCursor = parseCollectionCursor(cursors.teams);
-      const memberTeamId = parseCollectionCursor(cursors.memberTeamId);
-      const memberCursor = parseEmailCursor(cursors.members);
+      const userCursor = parseEmailCursor(readUsers ? cursors.users : undefined);
+      const invitationCursor = parseEmailCursor(readInvitations ? cursors.invitations : undefined);
+      const teamCursor = parseCollectionCursor(readTeams ? cursors.teams : undefined);
+      const memberTeamId = parseCollectionCursor(readMembers ? cursors.memberTeamId : undefined);
+      const memberCursor = parseEmailCursor(readMembers ? cursors.members : undefined);
 
       if (
         userCursor === null ||
@@ -515,7 +529,11 @@ export function createPrismaAdminWorkflowRepository(
 
           const userWhere = adminUserWhere(normalizedSearch);
           const invitationWhere = adminInvitationWhere(normalizedSearch);
-          const teamWhere = adminTeamWhere(normalizedSearch);
+          const teamWhere: Prisma.TeamWhereInput = {
+            ...adminTeamWhere(normalizedSearch),
+            ...(view === "access" ? { deletedAt: null } : {}),
+            ...(view === "recovery" ? { deletedAt: { not: null } } : {}),
+          };
           const memberWhere = adminTeamMemberWhere(
             normalizedSearch,
             memberTeamId,
@@ -569,7 +587,7 @@ export function createPrismaAdminWorkflowRepository(
             return null;
           }
 
-          const users = await tx.user.findMany({
+          const users = readUsers ? await tx.user.findMany({
             where: userWhere,
             orderBy: [{ email: "asc" }, { id: "asc" }],
             ...(authorizedUserCursor
@@ -587,8 +605,8 @@ export function createPrismaAdminWorkflowRepository(
                 },
               },
             },
-          });
-          const invitations = await tx.invitation.findMany({
+          }) : [];
+          const invitations = readInvitations ? await tx.invitation.findMany({
             where: invitationWhere,
             orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
             ...(authorizedInvitationCursor
@@ -603,8 +621,8 @@ export function createPrismaAdminWorkflowRepository(
               status: true,
               expiresAt: true,
             },
-          });
-          const teams = await tx.team.findMany({
+          }) : [];
+          const teams = readTeams ? await tx.team.findMany({
             where: teamWhere,
             orderBy: [
               { deletedAt: { sort: "asc", nulls: "first" } },
@@ -625,7 +643,7 @@ export function createPrismaAdminWorkflowRepository(
                   email: true,
                 },
               },
-              memberships: {
+              memberships: readMembers ? {
                 where: adminTeamMemberWhere(normalizedSearch),
                 orderBy: [{ user: { email: "asc" } }, { id: "asc" }],
                 take: ADMIN_TEAM_MEMBER_LIMIT + 1,
@@ -639,9 +657,9 @@ export function createPrismaAdminWorkflowRepository(
                     },
                   },
                 },
-              },
+              } : undefined,
             },
-          });
+          }) : [];
 
           const pageTeams = teams.slice(0, ADMIN_TEAM_LIMIT);
 
@@ -709,7 +727,10 @@ export function createPrismaAdminWorkflowRepository(
               const membershipRows =
                 team.id === memberTeamId && selectedMemberRows
                   ? selectedMemberRows
-                  : team.memberships;
+                  // Prisma widens an optional relation selection to the model
+                  // type. The selected branch explicitly projects user below;
+                  // recovery never requests or consumes these member rows.
+                  : readMembers ? (team.memberships ?? []) as unknown as AdminMemberProjection[] : [];
               const membershipPage = membershipRows.slice(
                 0,
                 ADMIN_TEAM_MEMBER_LIMIT,
@@ -721,6 +742,10 @@ export function createPrismaAdminWorkflowRepository(
                 ownerEmail: team.createdBy.email,
                 deletedAt: team.deletedAt?.toISOString() ?? null,
                 purgeAfter: team.purgeAfter?.toISOString() ?? null,
+                recoveryEligibility: !team.deletedAt
+                  ? "active" as const
+                  : team.purgeAfter && team.purgeAfter.getTime() > Date.now()
+                    ? "eligible" as const : "expired" as const,
                 members: membershipPage.flatMap((membership) =>
                   membership.user.email
                     ? [
@@ -1280,11 +1305,13 @@ export function getAdminConsoleData(
   actorUserId: string,
   searchQuery?: string,
   cursors: AdminConsoleCursors = {},
+  view?: AdminView,
 ) {
   return prismaAdminWorkflowRepository.getConsoleData(
     actorUserId,
     searchQuery,
     cursors,
+    view,
   );
 }
 
@@ -1292,6 +1319,7 @@ export async function getRateLimitedAdminConsoleData(
   actorUserId: string,
   searchQuery?: string,
   cursors: AdminConsoleCursors = {},
+  view?: AdminView,
 ) {
   await enforceUserRateLimit({
     scope: "admin-collection-read",
@@ -1300,7 +1328,7 @@ export async function getRateLimitedAdminConsoleData(
     windowSeconds: 60,
   });
 
-  return getAdminConsoleData(actorUserId, searchQuery, cursors);
+  return getAdminConsoleData(actorUserId, searchQuery, cursors, view);
 }
 
 export function setUserEnabled(input: SetUserEnabledInput) {

@@ -16,6 +16,7 @@ const adminActionMocks = vi.hoisted(() => {
 
   return {
     auth: vi.fn<() => Promise<{ user: { id: string } } | null>>(),
+    canonicalSignInUrl: vi.fn(),
     changeRole: vi.fn(),
     createCorrelationId: vi.fn(() => "4f635d30-b641-4944-b66f-c3beac114f8a"),
     disableOrEnable: vi.fn(),
@@ -49,6 +50,8 @@ vi.mock("next/cache", () => ({
 vi.mock("@/lib/auth", () => ({
   auth: adminActionMocks.auth,
 }));
+
+vi.mock("@/lib/access-instructions", () => ({ canonicalSignInUrl: adminActionMocks.canonicalSignInUrl }));
 
 vi.mock("@/lib/db", () => ({
   db: {},
@@ -113,6 +116,7 @@ const TEAM_ID = "clh1234567890abcdefghijk";
 describe("administrative Server Action boundary", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    adminActionMocks.canonicalSignInUrl.mockReturnValue("https://ledger.example.test/login");
     adminActionMocks.auth.mockResolvedValue({ user: { id: "actor-internal-id" } });
     adminActionMocks.enforceUserRateLimit.mockResolvedValue({ allowed: true });
     adminActionMocks.disableOrEnable.mockResolvedValue({
@@ -325,9 +329,36 @@ describe("administrative Server Action boundary", () => {
 
     expect(result).toEqual({
       status: "error",
+      code: "RECENT_AUTHENTICATION_REQUIRED",
       message:
         "For safety, sign out and sign in again before making this administrative change.",
     });
     expect(JSON.stringify(result)).not.toContain(TEAM_ID);
+  });
+
+  it("returns the normalized email, persisted actual expiry and canonical instructions URL", async () => {
+    adminActionMocks.provisionInvitation.mockResolvedValue({
+      status: "unchanged", invitationId: "hidden-invitation-id", expiresAt: new Date("2026-11-20T10:00:00.000Z"),
+    });
+    const result = await provisionInvitationAction({ email: " Existing@Example.com ", expiresInDays: 30 });
+    expect(result).toMatchObject({ status: "success", invitation: {
+      outcome: "unchanged", email: "existing@example.com", expiresAt: "2026-11-20T10:00:00.000Z", signInUrl: "https://ledger.example.test/login",
+    } });
+    expect(result.message).toContain("existing expiry is unchanged");
+    expect(result.message).toContain("No email has been sent");
+  });
+
+  it("does not claim a new invitation for an already-active identity", async () => {
+    adminActionMocks.provisionInvitation.mockResolvedValue({ status: "already_active", invitationId: null, expiresAt: null });
+    const result = await provisionInvitationAction({ email: "active@example.com", expiresInDays: 7 });
+    expect(result).toMatchObject({ status: "success", invitation: { outcome: "already_active", expiresAt: null } });
+    expect(result.message).toContain("No new invitation was created");
+  });
+
+  it("does not mutate an invitation when no trusted sign-in origin can be resolved", async () => {
+    adminActionMocks.canonicalSignInUrl.mockReturnValue(null);
+    const result = await provisionInvitationAction({ email: "target@example.com", expiresInDays: 7 });
+    expect(result.status).toBe("error");
+    expect(adminActionMocks.provisionInvitation).not.toHaveBeenCalled();
   });
 });

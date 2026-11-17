@@ -10,12 +10,16 @@ import {
 } from "@/lib/date-time";
 
 describe("calendar date validation", () => {
-  it.each(["2024-02-29", "2000-02-29", "2026-07-15"])(
-    "accepts real calendar date %s",
-    (value) => {
-      expect(isValidCalendarDateInput(value)).toBe(true);
-    },
-  );
+  it.each([
+    "0001-01-01",
+    "0099-12-31",
+    "0100-01-01",
+    "2024-02-29",
+    "2000-02-29",
+    "2026-07-15",
+  ])("accepts real calendar date %s", (value) => {
+    expect(isValidCalendarDateInput(value)).toBe(true);
+  });
 
   it.each([
     "2023-02-29",
@@ -33,12 +37,15 @@ describe("calendar date validation", () => {
     );
   });
 
-  it("round-trips a date-only value through the Prisma Date boundary", () => {
-    const databaseDate = parseTransactionDateInput("2024-02-29");
+  it.each(["0001-01-01", "0099-01-01", "0100-01-01", "2024-02-29"])(
+    "round-trips the date-only value %s without changing its year",
+    (value) => {
+      const databaseDate = parseTransactionDateInput(value);
 
-    expect(databaseDate.toISOString()).toBe("2024-02-29T00:00:00.000Z");
-    expect(toTransactionDateInputValue(databaseDate)).toBe("2024-02-29");
-  });
+      expect(databaseDate.toISOString()).toBe(`${value}T00:00:00.000Z`);
+      expect(toTransactionDateInputValue(databaseDate)).toBe(value);
+    },
+  );
 });
 
 describe("Asia/Dhaka date policy", () => {

@@ -1,0 +1,66 @@
+[
+  {
+    "screen": "login",
+    "width": 1440,
+    "url": "http://127.0.0.1:3049/login",
+    "heading": [
+      "Sign in to Money Tracker"
+    ]
+  },
+  {
+    "screen": "dashboard",
+    "width": 1440,
+    "url": "http://127.0.0.1:3049/dashboard/cmwjiz57f0003s1ojrelmusj7",
+    "heading": [
+      "Dhaka Studio"
+    ]
+  },
+  {
+    "screen": "groups",
+    "width": 1440,
+    "url": "http://127.0.0.1:3049/groups",
+    "heading": [
+      "Welcome back, Ayesha."
+    ]
+  },
+  {
+    "screen": "admin",
+    "width": 1440,
+    "url": "http://127.0.0.1:3049/admin",
+    "heading": [
+      "Security and lifecycle console"
+    ]
+  },
+  {
+    "screen": "login",
+    "width": 390,
+    "url": "http://127.0.0.1:3049/login",
+    "heading": [
+      "Sign in to Money Tracker"
+    ]
+  },
+  {
+    "screen": "dashboard",
+    "width": 390,
+    "url": "http://127.0.0.1:3049/dashboard/cmwjiz57f0003s1ojrelmusj7",
+    "heading": [
+      "Dhaka Studio"
+    ]
+  },
+  {
+    "screen": "groups",
+    "width": 390,
+    "url": "http://127.0.0.1:3049/groups",
+    "heading": [
+      "Welcome back, Ayesha."
+    ]
+  },
+  {
+    "screen": "admin",
+    "width": 390,
+    "url": "http://127.0.0.1:3049/admin",
+    "heading": [
+      "Security and lifecycle console"
+    ]
+  }
+]

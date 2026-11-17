@@ -47,7 +47,7 @@ export type TransactionActionResult =
   | {
       status: "error";
       message: string;
-      code?: "IDEMPOTENCY_CONFLICT";
+      code?: "IDEMPOTENCY_CONFLICT" | "OUTCOME_UNKNOWN";
       retryAfterSeconds?: number;
       fieldErrors?: Partial<Record<keyof TransactionFormValues, string>>;
     };
@@ -219,6 +219,7 @@ export async function createTransaction(
 
     return {
       status: "error",
+      code: "OUTCOME_UNKNOWN",
       message:
         `We could not confirm this transaction. Submit the unchanged form again; its operation key prevents a duplicate if the first write committed. Reference: ${correlationId}.`,
     };

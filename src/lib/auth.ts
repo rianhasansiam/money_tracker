@@ -1,7 +1,13 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
-import type { NextRequest } from "next/server";
+import { NextResponse, type NextFetchEvent, type NextMiddleware, type NextRequest } from "next/server";
 import { createHardenedPrismaAdapter } from "@/lib/auth-adapter";
+import { enforceAuthenticationStart } from "@/lib/authentication-start";
+import { withSessionCookieDeadline } from "@/lib/auth-session-lifetime";
+import {
+  RateLimitExceededError,
+  RateLimitUnavailableError,
+} from "@/lib/rate-limit";
 import {
   createBrowserSessionDto,
   createPublicSessionDto,
@@ -128,7 +134,42 @@ function protectAuthHandler(
       });
     }
 
-    const response = await handler(request);
+    if (
+      request.method === "POST" &&
+      /^\/api\/auth\/signin\/google\/?$/.test(request.nextUrl.pathname)
+    ) {
+      try {
+        await enforceAuthenticationStart(request.headers);
+      } catch (error) {
+        if (error instanceof RateLimitExceededError) {
+          return Response.json(
+            {
+              error: "rate_limited",
+              message: "Too many sign-in attempts. Please try again shortly.",
+            },
+            {
+              status: 429,
+              headers: {
+                "cache-control": "no-store",
+                "retry-after": String(error.retryAfterSeconds),
+              },
+            },
+          );
+        }
+        if (error instanceof RateLimitUnavailableError) {
+          return Response.json(
+            {
+              error: "unavailable",
+              message: "Sign-in protection is temporarily unavailable. Please try again later.",
+            },
+            { status: 503, headers: { "cache-control": "no-store" } },
+          );
+        }
+        throw error;
+      }
+    }
+
+    const response = await withSessionCookieDeadline(() => handler(request));
 
     if (
       request.nextUrl.pathname.endsWith("/session") &&
@@ -160,3 +201,16 @@ export const handlers = {
 };
 
 export const { auth, signIn, signOut } = authResult;
+
+// The Node.js Proxy overload emits renewal cookies too. Server-component
+// auth() calls have no response cookies and receive the capped adapter DTO.
+export function proxy(request: NextRequest, event: NextFetchEvent) {
+  return withSessionCookieDeadline(async () => {
+    // Auth.js augments NextRequest.auth inside this overload; its published
+    // input type already requires that augmentation, although the runtime
+    // explicitly accepts an ordinary NextRequest (the direct Proxy export).
+    const authProxy = authResult.auth as unknown as NextMiddleware;
+    const response = await authProxy(request, event);
+    return response ?? NextResponse.next();
+  });
+}

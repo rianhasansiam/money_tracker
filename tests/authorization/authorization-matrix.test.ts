@@ -150,7 +150,7 @@ describe("group Server Action authorization boundary", () => {
       ).resolves.toEqual({
         status: "error",
         message:
-          "This group request cannot be processed. Refresh the page and try again.",
+          "This team request cannot be processed. Refresh the page and try again.",
       });
       expect(groupActionMocks.enforceUserRateLimit).not.toHaveBeenCalled();
       expect(groupActionMocks.recordAuditEvent).not.toHaveBeenCalled();

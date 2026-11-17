@@ -28,6 +28,12 @@ function copyRuntimeAsset(source, destination) {
 
 function removePrismaTooling(directory) {
   for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    // Next may copy dotenv files into standalone independently of tracing.
+    // Runtime configuration comes from the deployment environment instead.
+    if (entry.name.startsWith(".env")) {
+      rmSync(join(directory, entry.name), { force: true, recursive: true });
+      continue;
+    }
     if (!entry.isDirectory()) {
       continue;
     }

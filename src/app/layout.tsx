@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     template: "%s | Money Tracker",
   },
   description:
-    "A polished personal transaction tracker with Google authentication, durable transaction history, and live balance updates.",
+    "Track your team's BDT balance and transaction history with controlled access and a clear shared ledger.",
 };
 
 export default function RootLayout({

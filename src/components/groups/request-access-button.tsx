@@ -10,7 +10,7 @@ interface RequestAccessButtonProps {
   teamId: string;
 }
 
-export function RequestAccessButton({ teamId }: RequestAccessButtonProps) {
+export function RequestAccessButton({ teamId, requestsHref }: RequestAccessButtonProps & { requestsHref?: string }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -29,6 +29,7 @@ export function RequestAccessButton({ teamId }: RequestAccessButtonProps) {
             }
 
             toast.success(result.message);
+            if (requestsHref?.startsWith("/groups?")) router.push(requestsHref);
             router.refresh();
           } catch {
             toast.error(

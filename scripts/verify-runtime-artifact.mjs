@@ -12,9 +12,13 @@ if (!existsSync(serverEntry)) {
 }
 
 const forbiddenDirectories = [];
+const forbiddenEnvironmentFiles = [];
 
 function inspect(directory) {
   for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    if (entry.name.startsWith(".env")) {
+      forbiddenEnvironmentFiles.push(join(directory, entry.name));
+    }
     if (!entry.isDirectory()) {
       continue;
     }
@@ -39,6 +43,10 @@ function inspect(directory) {
 }
 
 inspect(artifactRoot);
+
+if (forbiddenEnvironmentFiles.length > 0) {
+  throw new Error("Private environment files remain in the standalone runtime artifact.");
+}
 
 if (forbiddenDirectories.length > 0) {
   const paths = forbiddenDirectories
@@ -81,5 +89,5 @@ if (!existsSync(generatedClient)) {
 }
 
 console.log(
-  "Runtime artifact verified: Prisma CLI/tooling absent and required database runtime packages present.",
+  "Runtime artifact verified: environment files and Prisma CLI/tooling absent; required database runtime packages present.",
 );

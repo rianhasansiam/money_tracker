@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
+import { TransactionDraftMemoryProvider } from "@/components/dashboard/transaction-draft-memory";
 
 export function Providers({ children }: { children: ReactNode }) {
   const [toastPosition, setToastPosition] = useState<"top-right" | "top-center">(
@@ -24,9 +25,9 @@ export function Providers({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <>
+    <TransactionDraftMemoryProvider>
       {children}
       <Toaster position={toastPosition} richColors />
-    </>
+    </TransactionDraftMemoryProvider>
   );
 }

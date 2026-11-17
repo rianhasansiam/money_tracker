@@ -80,7 +80,26 @@ export function getMoneyInputErrorReason(value: string) {
 }
 
 export function formatCurrencyFromMinorUnits(amountInCents: number) {
-  return moneyFormatter.format(amountInCents / 100);
+  if (!Number.isSafeInteger(amountInCents)) {
+    throw new MoneyAggregateOverflowError();
+  }
+
+  const minorUnits = BigInt(amountInCents);
+  const wholeUnits = minorUnits / ONE_HUNDRED_MINOR_UNITS;
+  const absoluteMinorUnits =
+    minorUnits < ZERO_MINOR_UNITS ? -minorUnits : minorUnits;
+  const fraction = String(
+    absoluteMinorUnits % ONE_HUNDRED_MINOR_UNITS,
+  ).padStart(2, "0");
+  const isNegative = amountInCents < 0 || Object.is(amountInCents, -0);
+  // Preserve the locale's negative sign even when the whole-unit part is zero.
+  const formattedWholeUnits =
+    wholeUnits === ZERO_MINOR_UNITS && isNegative ? -0 : wholeUnits;
+
+  return moneyFormatter
+    .formatToParts(formattedWholeUnits)
+    .map((part) => (part.type === "fraction" ? fraction : part.value))
+    .join("");
 }
 
 export function formatSignedCurrency(

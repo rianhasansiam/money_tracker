@@ -1,0 +1,1495 @@
+{
+  "generatedAt": "2026-11-16T17:18:52.426Z",
+  "widths": [
+    320,
+    390,
+    768,
+    1024,
+    1440
+  ],
+  "checks": [
+    {
+      "screen": "login",
+      "viewportWidth": 320,
+      "nativeZoom": 1,
+      "innerWidth": 320,
+      "innerHeight": 900,
+      "documentWidth": 320,
+      "bodyWidth": 320,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 1,
+      "minimumButtonHeight": 48,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "login-rate-limited",
+      "viewportWidth": 320,
+      "nativeZoom": 1,
+      "innerWidth": 320,
+      "innerHeight": 900,
+      "documentWidth": 320,
+      "bodyWidth": 320,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 1,
+      "minimumButtonHeight": 48,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "admission-error",
+      "viewportWidth": 320,
+      "nativeZoom": 1,
+      "innerWidth": 320,
+      "innerHeight": 900,
+      "documentWidth": 320,
+      "bodyWidth": 320,
+      "devicePixelRatio": 1,
+      "contrastRatios": [],
+      "buttonTargetsChecked": 1,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "not-found",
+      "viewportWidth": 320,
+      "nativeZoom": 1,
+      "innerWidth": 320,
+      "innerHeight": 900,
+      "documentWidth": 320,
+      "bodyWidth": 320,
+      "devicePixelRatio": 1,
+      "contrastRatios": [],
+      "buttonTargetsChecked": 0,
+      "minimumButtonHeight": null,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "dashboard",
+      "viewportWidth": 320,
+      "nativeZoom": 1,
+      "innerWidth": 320,
+      "innerHeight": 900,
+      "documentWidth": 320,
+      "bodyWidth": 320,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842,
+        5.0155974781114745,
+        6.4700447145121895
+      ],
+      "buttonTargetsChecked": 5,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "empty-dashboard",
+      "viewportWidth": 320,
+      "nativeZoom": 1,
+      "innerWidth": 320,
+      "innerHeight": 900,
+      "documentWidth": 320,
+      "bodyWidth": 320,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 5,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "member-dashboard",
+      "viewportWidth": 320,
+      "nativeZoom": 1,
+      "innerWidth": 320,
+      "innerHeight": 900,
+      "documentWidth": 320,
+      "bodyWidth": 320,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842,
+        5.0155974781114745,
+        6.4700447145121895
+      ],
+      "buttonTargetsChecked": 2,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "groups",
+      "viewportWidth": 320,
+      "nativeZoom": 1,
+      "innerWidth": 320,
+      "innerHeight": 900,
+      "documentWidth": 320,
+      "bodyWidth": 320,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 43,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": {
+        "name": "Open dashboard",
+        "tag": "A",
+        "width": 220,
+        "height": 44,
+        "computedHeight": "44px",
+        "minHeight": "44px",
+        "flexBasis": "0%",
+        "flexGrow": "1",
+        "flexShrink": "1",
+        "lineHeight": "20px",
+        "paddingTop": "0px",
+        "paddingBottom": "0px"
+      },
+      "status": "passed"
+    },
+    {
+      "screen": "admin",
+      "viewportWidth": 320,
+      "nativeZoom": 1,
+      "innerWidth": 320,
+      "innerHeight": 900,
+      "documentWidth": 320,
+      "bodyWidth": 320,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 69,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "admin-no-results",
+      "viewportWidth": 320,
+      "nativeZoom": 1,
+      "innerWidth": 320,
+      "innerHeight": 900,
+      "documentWidth": 320,
+      "bodyWidth": 320,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 4,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "login",
+      "viewportWidth": 390,
+      "nativeZoom": 1,
+      "innerWidth": 390,
+      "innerHeight": 900,
+      "documentWidth": 390,
+      "bodyWidth": 390,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 1,
+      "minimumButtonHeight": 48,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "login-rate-limited",
+      "viewportWidth": 390,
+      "nativeZoom": 1,
+      "innerWidth": 390,
+      "innerHeight": 900,
+      "documentWidth": 390,
+      "bodyWidth": 390,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 1,
+      "minimumButtonHeight": 48,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "admission-error",
+      "viewportWidth": 390,
+      "nativeZoom": 1,
+      "innerWidth": 390,
+      "innerHeight": 900,
+      "documentWidth": 390,
+      "bodyWidth": 390,
+      "devicePixelRatio": 1,
+      "contrastRatios": [],
+      "buttonTargetsChecked": 1,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "not-found",
+      "viewportWidth": 390,
+      "nativeZoom": 1,
+      "innerWidth": 390,
+      "innerHeight": 900,
+      "documentWidth": 390,
+      "bodyWidth": 390,
+      "devicePixelRatio": 1,
+      "contrastRatios": [],
+      "buttonTargetsChecked": 0,
+      "minimumButtonHeight": null,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "dashboard",
+      "viewportWidth": 390,
+      "nativeZoom": 1,
+      "innerWidth": 390,
+      "innerHeight": 900,
+      "documentWidth": 390,
+      "bodyWidth": 390,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842,
+        5.0155974781114745,
+        6.4700447145121895
+      ],
+      "buttonTargetsChecked": 5,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "empty-dashboard",
+      "viewportWidth": 390,
+      "nativeZoom": 1,
+      "innerWidth": 390,
+      "innerHeight": 900,
+      "documentWidth": 390,
+      "bodyWidth": 390,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 5,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "member-dashboard",
+      "viewportWidth": 390,
+      "nativeZoom": 1,
+      "innerWidth": 390,
+      "innerHeight": 900,
+      "documentWidth": 390,
+      "bodyWidth": 390,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842,
+        5.0155974781114745,
+        6.4700447145121895
+      ],
+      "buttonTargetsChecked": 2,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "groups",
+      "viewportWidth": 390,
+      "nativeZoom": 1,
+      "innerWidth": 390,
+      "innerHeight": 900,
+      "documentWidth": 390,
+      "bodyWidth": 390,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 43,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": {
+        "name": "Open dashboard",
+        "tag": "A",
+        "width": 290,
+        "height": 44,
+        "computedHeight": "44px",
+        "minHeight": "44px",
+        "flexBasis": "0%",
+        "flexGrow": "1",
+        "flexShrink": "1",
+        "lineHeight": "20px",
+        "paddingTop": "0px",
+        "paddingBottom": "0px"
+      },
+      "status": "passed"
+    },
+    {
+      "screen": "admin",
+      "viewportWidth": 390,
+      "nativeZoom": 1,
+      "innerWidth": 390,
+      "innerHeight": 900,
+      "documentWidth": 390,
+      "bodyWidth": 390,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 69,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "admin-no-results",
+      "viewportWidth": 390,
+      "nativeZoom": 1,
+      "innerWidth": 390,
+      "innerHeight": 900,
+      "documentWidth": 390,
+      "bodyWidth": 390,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 4,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "login",
+      "viewportWidth": 768,
+      "nativeZoom": 1,
+      "innerWidth": 768,
+      "innerHeight": 900,
+      "documentWidth": 768,
+      "bodyWidth": 768,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 1,
+      "minimumButtonHeight": 48,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "login-rate-limited",
+      "viewportWidth": 768,
+      "nativeZoom": 1,
+      "innerWidth": 768,
+      "innerHeight": 900,
+      "documentWidth": 768,
+      "bodyWidth": 768,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 1,
+      "minimumButtonHeight": 48,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "admission-error",
+      "viewportWidth": 768,
+      "nativeZoom": 1,
+      "innerWidth": 768,
+      "innerHeight": 900,
+      "documentWidth": 768,
+      "bodyWidth": 768,
+      "devicePixelRatio": 1,
+      "contrastRatios": [],
+      "buttonTargetsChecked": 1,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "not-found",
+      "viewportWidth": 768,
+      "nativeZoom": 1,
+      "innerWidth": 768,
+      "innerHeight": 900,
+      "documentWidth": 768,
+      "bodyWidth": 768,
+      "devicePixelRatio": 1,
+      "contrastRatios": [],
+      "buttonTargetsChecked": 0,
+      "minimumButtonHeight": null,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "dashboard",
+      "viewportWidth": 768,
+      "nativeZoom": 1,
+      "innerWidth": 768,
+      "innerHeight": 900,
+      "documentWidth": 768,
+      "bodyWidth": 768,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842,
+        5.0155974781114745,
+        6.4700447145121895
+      ],
+      "buttonTargetsChecked": 5,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "empty-dashboard",
+      "viewportWidth": 768,
+      "nativeZoom": 1,
+      "innerWidth": 768,
+      "innerHeight": 900,
+      "documentWidth": 768,
+      "bodyWidth": 768,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 5,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "member-dashboard",
+      "viewportWidth": 768,
+      "nativeZoom": 1,
+      "innerWidth": 768,
+      "innerHeight": 900,
+      "documentWidth": 768,
+      "bodyWidth": 768,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842,
+        5.0155974781114745,
+        6.4700447145121895
+      ],
+      "buttonTargetsChecked": 2,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "groups",
+      "viewportWidth": 768,
+      "nativeZoom": 1,
+      "innerWidth": 768,
+      "innerHeight": 900,
+      "documentWidth": 768,
+      "bodyWidth": 768,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 43,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": {
+        "name": "Open dashboard",
+        "tag": "A",
+        "width": 81.546875,
+        "height": 44,
+        "computedHeight": "44px",
+        "minHeight": "44px",
+        "flexBasis": "0%",
+        "flexGrow": "1",
+        "flexShrink": "1",
+        "lineHeight": "20px",
+        "paddingTop": "0px",
+        "paddingBottom": "0px"
+      },
+      "status": "passed"
+    },
+    {
+      "screen": "admin",
+      "viewportWidth": 768,
+      "nativeZoom": 1,
+      "innerWidth": 768,
+      "innerHeight": 900,
+      "documentWidth": 768,
+      "bodyWidth": 768,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 69,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "admin-no-results",
+      "viewportWidth": 768,
+      "nativeZoom": 1,
+      "innerWidth": 768,
+      "innerHeight": 900,
+      "documentWidth": 768,
+      "bodyWidth": 768,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 4,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "login",
+      "viewportWidth": 1024,
+      "nativeZoom": 1,
+      "innerWidth": 1024,
+      "innerHeight": 900,
+      "documentWidth": 1024,
+      "bodyWidth": 1024,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 1,
+      "minimumButtonHeight": 48,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "login-rate-limited",
+      "viewportWidth": 1024,
+      "nativeZoom": 1,
+      "innerWidth": 1024,
+      "innerHeight": 900,
+      "documentWidth": 1024,
+      "bodyWidth": 1024,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 1,
+      "minimumButtonHeight": 48,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "admission-error",
+      "viewportWidth": 1024,
+      "nativeZoom": 1,
+      "innerWidth": 1024,
+      "innerHeight": 900,
+      "documentWidth": 1024,
+      "bodyWidth": 1024,
+      "devicePixelRatio": 1,
+      "contrastRatios": [],
+      "buttonTargetsChecked": 1,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "not-found",
+      "viewportWidth": 1024,
+      "nativeZoom": 1,
+      "innerWidth": 1024,
+      "innerHeight": 900,
+      "documentWidth": 1024,
+      "bodyWidth": 1024,
+      "devicePixelRatio": 1,
+      "contrastRatios": [],
+      "buttonTargetsChecked": 0,
+      "minimumButtonHeight": null,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "dashboard",
+      "viewportWidth": 1024,
+      "nativeZoom": 1,
+      "innerWidth": 1024,
+      "innerHeight": 900,
+      "documentWidth": 1024,
+      "bodyWidth": 1024,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842,
+        5.0155974781114745,
+        6.4700447145121895
+      ],
+      "buttonTargetsChecked": 5,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "empty-dashboard",
+      "viewportWidth": 1024,
+      "nativeZoom": 1,
+      "innerWidth": 1024,
+      "innerHeight": 900,
+      "documentWidth": 1024,
+      "bodyWidth": 1024,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 5,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "member-dashboard",
+      "viewportWidth": 1024,
+      "nativeZoom": 1,
+      "innerWidth": 1024,
+      "innerHeight": 900,
+      "documentWidth": 1024,
+      "bodyWidth": 1024,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842,
+        5.0155974781114745,
+        6.4700447145121895
+      ],
+      "buttonTargetsChecked": 2,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "groups",
+      "viewportWidth": 1024,
+      "nativeZoom": 1,
+      "innerWidth": 1024,
+      "innerHeight": 900,
+      "documentWidth": 1024,
+      "bodyWidth": 1024,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 43,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": {
+        "name": "Open dashboard",
+        "tag": "A",
+        "width": 201.546875,
+        "height": 44,
+        "computedHeight": "44px",
+        "minHeight": "44px",
+        "flexBasis": "0%",
+        "flexGrow": "1",
+        "flexShrink": "1",
+        "lineHeight": "20px",
+        "paddingTop": "0px",
+        "paddingBottom": "0px"
+      },
+      "status": "passed"
+    },
+    {
+      "screen": "admin",
+      "viewportWidth": 1024,
+      "nativeZoom": 1,
+      "innerWidth": 1024,
+      "innerHeight": 900,
+      "documentWidth": 1024,
+      "bodyWidth": 1024,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 69,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "admin-no-results",
+      "viewportWidth": 1024,
+      "nativeZoom": 1,
+      "innerWidth": 1024,
+      "innerHeight": 900,
+      "documentWidth": 1024,
+      "bodyWidth": 1024,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 4,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "login",
+      "viewportWidth": 1440,
+      "nativeZoom": 1,
+      "innerWidth": 1440,
+      "innerHeight": 900,
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 1,
+      "minimumButtonHeight": 48,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "login-rate-limited",
+      "viewportWidth": 1440,
+      "nativeZoom": 1,
+      "innerWidth": 1440,
+      "innerHeight": 900,
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 1,
+      "minimumButtonHeight": 48,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "admission-error",
+      "viewportWidth": 1440,
+      "nativeZoom": 1,
+      "innerWidth": 1440,
+      "innerHeight": 900,
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "devicePixelRatio": 1,
+      "contrastRatios": [],
+      "buttonTargetsChecked": 1,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "not-found",
+      "viewportWidth": 1440,
+      "nativeZoom": 1,
+      "innerWidth": 1440,
+      "innerHeight": 900,
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "devicePixelRatio": 1,
+      "contrastRatios": [],
+      "buttonTargetsChecked": 0,
+      "minimumButtonHeight": null,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "dashboard",
+      "viewportWidth": 1440,
+      "nativeZoom": 1,
+      "innerWidth": 1440,
+      "innerHeight": 900,
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842,
+        5.0155974781114745,
+        6.4700447145121895
+      ],
+      "buttonTargetsChecked": 5,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "empty-dashboard",
+      "viewportWidth": 1440,
+      "nativeZoom": 1,
+      "innerWidth": 1440,
+      "innerHeight": 900,
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 5,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "member-dashboard",
+      "viewportWidth": 1440,
+      "nativeZoom": 1,
+      "innerWidth": 1440,
+      "innerHeight": 900,
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842,
+        5.0155974781114745,
+        6.4700447145121895
+      ],
+      "buttonTargetsChecked": 2,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "groups",
+      "viewportWidth": 1440,
+      "nativeZoom": 1,
+      "innerWidth": 1440,
+      "innerHeight": 900,
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 43,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": {
+        "name": "Open dashboard",
+        "tag": "A",
+        "width": 173.546875,
+        "height": 44,
+        "computedHeight": "44px",
+        "minHeight": "44px",
+        "flexBasis": "0%",
+        "flexGrow": "1",
+        "flexShrink": "1",
+        "lineHeight": "20px",
+        "paddingTop": "0px",
+        "paddingBottom": "0px"
+      },
+      "status": "passed"
+    },
+    {
+      "screen": "admin",
+      "viewportWidth": 1440,
+      "nativeZoom": 1,
+      "innerWidth": 1440,
+      "innerHeight": 900,
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 69,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "admin-no-results",
+      "viewportWidth": 1440,
+      "nativeZoom": 1,
+      "innerWidth": 1440,
+      "innerHeight": 900,
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 4,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "quarantine-dialog",
+      "viewportWidth": 320,
+      "viewportHeight": 480,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 320,
+        "height": 480
+      },
+      "desktopBounds": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900
+      },
+      "nativeModal": true,
+      "focusContained": true,
+      "focusSequence": [
+        {
+          "key": "Tab",
+          "inside": true,
+          "tag": "BUTTON",
+          "id": "",
+          "text": "Keep group"
+        },
+        {
+          "key": "Tab",
+          "inside": true,
+          "tag": "BUTTON",
+          "id": "",
+          "text": "Quarantine for 30 days"
+        },
+        {
+          "key": "Tab",
+          "inside": true,
+          "tag": "BUTTON",
+          "id": "",
+          "text": ""
+        },
+        {
+          "key": "Tab",
+          "inside": true,
+          "tag": "INPUT",
+          "id": "confirm-team-cmwjj20gn008chpojkf87a16n",
+          "text": ""
+        },
+        {
+          "key": "Tab",
+          "inside": true,
+          "tag": "BUTTON",
+          "id": "",
+          "text": "Keep group"
+        },
+        {
+          "key": "Tab",
+          "inside": true,
+          "tag": "BUTTON",
+          "id": "",
+          "text": "Quarantine for 30 days"
+        },
+        {
+          "key": "Tab",
+          "inside": true,
+          "tag": "BUTTON",
+          "id": "",
+          "text": ""
+        },
+        {
+          "key": "Tab",
+          "inside": true,
+          "tag": "INPUT",
+          "id": "confirm-team-cmwjj20gn008chpojkf87a16n",
+          "text": ""
+        },
+        {
+          "key": "Shift+Tab",
+          "inside": true,
+          "tag": "BUTTON",
+          "id": "",
+          "text": ""
+        },
+        {
+          "key": "Shift+Tab",
+          "inside": true,
+          "tag": "BUTTON",
+          "id": "",
+          "text": "Quarantine for 30 days"
+        },
+        {
+          "key": "Shift+Tab",
+          "inside": true,
+          "tag": "BUTTON",
+          "id": "",
+          "text": "Keep group"
+        },
+        {
+          "key": "Shift+Tab",
+          "inside": true,
+          "tag": "INPUT",
+          "id": "confirm-team-cmwjj20gn008chpojkf87a16n",
+          "text": ""
+        },
+        {
+          "key": "Shift+Tab",
+          "inside": true,
+          "tag": "BUTTON",
+          "id": "",
+          "text": ""
+        },
+        {
+          "key": "Shift+Tab",
+          "inside": true,
+          "tag": "BUTTON",
+          "id": "",
+          "text": "Quarantine for 30 days"
+        },
+        {
+          "key": "Shift+Tab",
+          "inside": true,
+          "tag": "BUTTON",
+          "id": "",
+          "text": "Keep group"
+        },
+        {
+          "key": "Shift+Tab",
+          "inside": true,
+          "tag": "INPUT",
+          "id": "confirm-team-cmwjj20gn008chpojkf87a16n",
+          "text": ""
+        }
+      ],
+      "pendingFocus": {
+        "tag": "DIALOG",
+        "id": ""
+      },
+      "backgroundScrollLocked": true,
+      "pendingDuplicateRequests": 1,
+      "recoverableNetworkFailure": true,
+      "status": "passed"
+    },
+    {
+      "screen": "login",
+      "viewportWidth": 768,
+      "nativeZoom": 2,
+      "innerWidth": 384,
+      "innerHeight": 450,
+      "documentWidth": 384,
+      "bodyWidth": 384,
+      "devicePixelRatio": 2,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 1,
+      "minimumButtonHeight": 48,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "login-rate-limited",
+      "viewportWidth": 768,
+      "nativeZoom": 2,
+      "innerWidth": 384,
+      "innerHeight": 450,
+      "documentWidth": 384,
+      "bodyWidth": 384,
+      "devicePixelRatio": 2,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 1,
+      "minimumButtonHeight": 48,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "admission-error",
+      "viewportWidth": 768,
+      "nativeZoom": 2,
+      "innerWidth": 384,
+      "innerHeight": 450,
+      "documentWidth": 384,
+      "bodyWidth": 384,
+      "devicePixelRatio": 2,
+      "contrastRatios": [],
+      "buttonTargetsChecked": 1,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "not-found",
+      "viewportWidth": 768,
+      "nativeZoom": 2,
+      "innerWidth": 384,
+      "innerHeight": 450,
+      "documentWidth": 384,
+      "bodyWidth": 384,
+      "devicePixelRatio": 2,
+      "contrastRatios": [],
+      "buttonTargetsChecked": 0,
+      "minimumButtonHeight": null,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "dashboard",
+      "viewportWidth": 768,
+      "nativeZoom": 2,
+      "innerWidth": 384,
+      "innerHeight": 450,
+      "documentWidth": 384,
+      "bodyWidth": 384,
+      "devicePixelRatio": 2,
+      "contrastRatios": [
+        5.473250081210842,
+        5.0155974781114745,
+        6.4700447145121895
+      ],
+      "buttonTargetsChecked": 5,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "empty-dashboard",
+      "viewportWidth": 768,
+      "nativeZoom": 2,
+      "innerWidth": 384,
+      "innerHeight": 450,
+      "documentWidth": 384,
+      "bodyWidth": 384,
+      "devicePixelRatio": 2,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 5,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "member-dashboard",
+      "viewportWidth": 768,
+      "nativeZoom": 2,
+      "innerWidth": 384,
+      "innerHeight": 450,
+      "documentWidth": 384,
+      "bodyWidth": 384,
+      "devicePixelRatio": 2,
+      "contrastRatios": [
+        5.473250081210842,
+        5.0155974781114745,
+        6.4700447145121895
+      ],
+      "buttonTargetsChecked": 2,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "groups",
+      "viewportWidth": 768,
+      "nativeZoom": 2,
+      "innerWidth": 384,
+      "innerHeight": 450,
+      "documentWidth": 384,
+      "bodyWidth": 384,
+      "devicePixelRatio": 2,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 43,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": {
+        "name": "Open dashboard",
+        "tag": "A",
+        "width": 284,
+        "height": 44,
+        "computedHeight": "44px",
+        "minHeight": "44px",
+        "flexBasis": "0%",
+        "flexGrow": "1",
+        "flexShrink": "1",
+        "lineHeight": "20px",
+        "paddingTop": "0px",
+        "paddingBottom": "0px"
+      },
+      "status": "passed"
+    },
+    {
+      "screen": "admin",
+      "viewportWidth": 768,
+      "nativeZoom": 2,
+      "innerWidth": 384,
+      "innerHeight": 450,
+      "documentWidth": 384,
+      "bodyWidth": 384,
+      "devicePixelRatio": 2,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 69,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "admin-no-results",
+      "viewportWidth": 768,
+      "nativeZoom": 2,
+      "innerWidth": 384,
+      "innerHeight": 450,
+      "documentWidth": 384,
+      "bodyWidth": 384,
+      "devicePixelRatio": 2,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 4,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "login",
+      "viewportWidth": 1440,
+      "nativeZoom": 2,
+      "innerWidth": 720,
+      "innerHeight": 450,
+      "documentWidth": 720,
+      "bodyWidth": 720,
+      "devicePixelRatio": 2,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 1,
+      "minimumButtonHeight": 48,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "login-rate-limited",
+      "viewportWidth": 1440,
+      "nativeZoom": 2,
+      "innerWidth": 720,
+      "innerHeight": 450,
+      "documentWidth": 720,
+      "bodyWidth": 720,
+      "devicePixelRatio": 2,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 1,
+      "minimumButtonHeight": 48,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "admission-error",
+      "viewportWidth": 1440,
+      "nativeZoom": 2,
+      "innerWidth": 720,
+      "innerHeight": 450,
+      "documentWidth": 720,
+      "bodyWidth": 720,
+      "devicePixelRatio": 2,
+      "contrastRatios": [],
+      "buttonTargetsChecked": 1,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "not-found",
+      "viewportWidth": 1440,
+      "nativeZoom": 2,
+      "innerWidth": 720,
+      "innerHeight": 450,
+      "documentWidth": 720,
+      "bodyWidth": 720,
+      "devicePixelRatio": 2,
+      "contrastRatios": [],
+      "buttonTargetsChecked": 0,
+      "minimumButtonHeight": null,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "dashboard",
+      "viewportWidth": 1440,
+      "nativeZoom": 2,
+      "innerWidth": 720,
+      "innerHeight": 450,
+      "documentWidth": 720,
+      "bodyWidth": 720,
+      "devicePixelRatio": 2,
+      "contrastRatios": [
+        5.473250081210842,
+        5.0155974781114745,
+        6.4700447145121895
+      ],
+      "buttonTargetsChecked": 5,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "empty-dashboard",
+      "viewportWidth": 1440,
+      "nativeZoom": 2,
+      "innerWidth": 720,
+      "innerHeight": 450,
+      "documentWidth": 720,
+      "bodyWidth": 720,
+      "devicePixelRatio": 2,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 5,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "member-dashboard",
+      "viewportWidth": 1440,
+      "nativeZoom": 2,
+      "innerWidth": 720,
+      "innerHeight": 450,
+      "documentWidth": 720,
+      "bodyWidth": 720,
+      "devicePixelRatio": 2,
+      "contrastRatios": [
+        5.473250081210842,
+        5.0155974781114745,
+        6.4700447145121895
+      ],
+      "buttonTargetsChecked": 2,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "groups",
+      "viewportWidth": 1440,
+      "nativeZoom": 2,
+      "innerWidth": 720,
+      "innerHeight": 450,
+      "documentWidth": 720,
+      "bodyWidth": 720,
+      "devicePixelRatio": 2,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 43,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": {
+        "name": "Open dashboard",
+        "tag": "A",
+        "width": 376.546875,
+        "height": 44,
+        "computedHeight": "44px",
+        "minHeight": "44px",
+        "flexBasis": "0%",
+        "flexGrow": "1",
+        "flexShrink": "1",
+        "lineHeight": "20px",
+        "paddingTop": "0px",
+        "paddingBottom": "0px"
+      },
+      "status": "passed"
+    },
+    {
+      "screen": "admin",
+      "viewportWidth": 1440,
+      "nativeZoom": 2,
+      "innerWidth": 720,
+      "innerHeight": 450,
+      "documentWidth": 720,
+      "bodyWidth": 720,
+      "devicePixelRatio": 2,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 69,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "admin-no-results",
+      "viewportWidth": 1440,
+      "nativeZoom": 2,
+      "innerWidth": 720,
+      "innerHeight": 450,
+      "documentWidth": 720,
+      "bodyWidth": 720,
+      "devicePixelRatio": 2,
+      "contrastRatios": [
+        5.473250081210842
+      ],
+      "buttonTargetsChecked": 4,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "dashboard-loading",
+      "viewportWidth": 390,
+      "nativeZoom": 1,
+      "innerWidth": 390,
+      "innerHeight": 900,
+      "documentWidth": 390,
+      "bodyWidth": 390,
+      "devicePixelRatio": 1,
+      "contrastRatios": [],
+      "buttonTargetsChecked": 0,
+      "minimumButtonHeight": null,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "dashboard-error",
+      "viewportWidth": 390,
+      "nativeZoom": 1,
+      "innerWidth": 390,
+      "innerHeight": 900,
+      "documentWidth": 390,
+      "bodyWidth": 390,
+      "devicePixelRatio": 1,
+      "contrastRatios": [],
+      "buttonTargetsChecked": 2,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "dashboard",
+      "viewportWidth": 390,
+      "nativeZoom": 1,
+      "innerWidth": 390,
+      "innerHeight": 900,
+      "documentWidth": 390,
+      "bodyWidth": 390,
+      "devicePixelRatio": 1,
+      "contrastRatios": [
+        5.473250081210842,
+        5.0155974781114745,
+        6.4700447145121895
+      ],
+      "buttonTargetsChecked": 2,
+      "minimumButtonHeight": 44,
+      "dashboardLinkTarget": null,
+      "status": "passed"
+    },
+    {
+      "screen": "dashboard-recovery",
+      "actualLoadingBoundary": true,
+      "cancelledBlockedRequests": 1,
+      "retrySucceeded": true,
+      "financialRowsUnchanged": true,
+      "status": "passed"
+    }
+  ],
+  "limitations": [
+    "The controlled fault check targets the actual dashboard loading and recovery boundary; unrelated global error boundaries are not fault-injected.",
+    "Synthetic sessions exercise authorized pages; real Google callbacks and assistive-technology sessions require deployment validation."
+  ]
+}

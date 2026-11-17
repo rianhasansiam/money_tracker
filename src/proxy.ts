@@ -1,4 +1,4 @@
-export { auth as proxy } from "@/lib/auth";
+export { proxy } from "@/lib/auth";
 
 export const config = {
   matcher: ["/dashboard/:path*", "/groups/:path*", "/admin/:path*"],

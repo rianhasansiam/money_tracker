@@ -64,7 +64,7 @@ type UserLifecycleModule = typeof import("@/lib/user-lifecycle");
 type InvitationsModule = typeof import("@/lib/invitations");
 
 const GROUP_ACTION_UNAVAILABLE_MESSAGE =
-  "This group request cannot be processed. Refresh the page and try again.";
+  "This team request cannot be processed. Refresh the page and try again.";
 const TRANSACTION_DATE = new Date("2026-07-14T00:00:00.000Z");
 
 describe("disposable PostgreSQL financial-integrity integration", () => {
@@ -1799,12 +1799,13 @@ describe("disposable PostgreSQL financial-integrity integration", () => {
     });
     const adapter = hardenAuthAdapter(PrismaAdapter(db));
     const rawSessionToken = "synthetic-opaque-session-cookie";
-    const updatedExpiry = new Date("2026-07-16T08:00:00.000Z");
+    const now = new Date();
+    const updatedExpiry = new Date(now.getTime() + 2 * 60 * 60 * 1_000);
 
     const created = await adapter.createSession?.({
       sessionToken: rawSessionToken,
       userId: user.id,
-      expires: new Date("2026-07-16T07:00:00.000Z"),
+      expires: new Date(now.getTime() + 60 * 60 * 1_000),
     });
     expect(created?.sessionToken).toBe(rawSessionToken);
 
@@ -1830,7 +1831,7 @@ describe("disposable PostgreSQL financial-integrity integration", () => {
 
     const disabled = await userLifecycle.disableUserAndRevokeSessions(
       user.id,
-      new Date("2026-07-15T07:30:00.000Z"),
+      now,
     );
     expect(disabled.status).toBe("disabled");
 

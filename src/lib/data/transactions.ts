@@ -143,13 +143,10 @@ function normalizeTransactionInput(
     throw new InvalidTransactionInputError();
   }
 
-  const transactionDate = new Date(
-    Date.UTC(
-      input.transactionDate.getUTCFullYear(),
-      input.transactionDate.getUTCMonth(),
-      input.transactionDate.getUTCDate(),
-    ),
-  );
+  // Date.UTC treats years 0–99 as 1900–1999. Normalize the already parsed
+  // calendar date without reconstructing its year (or mutating caller input).
+  const transactionDate = new Date(input.transactionDate.getTime());
+  transactionDate.setUTCHours(0, 0, 0, 0);
 
   return {
     teamId: input.teamId,
